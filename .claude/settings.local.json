@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(if [ -d \"specs\" ])",
+      "Bash(then ls -d specs/[0-9]*-humanoid-robotics-book)",
+      "Bash(fi)",
+      "Bash(bash:*)",
+      "Bash(if [ -d \"D:/Projects/hackathon/humanoid-robotics-book/specs/001-humanoid-robotics-book/checklists\" ])",
+      "Bash(then echo \"EXISTS\")",
+      "Bash(else echo \"NOT_FOUND\")",
+      "Bash(npx create-docusaurus:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,55 +1,137 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Docusaurus Book Deployment Constitution
+
+<!--
+Sync Impact Report:
+Version: 1.0.0 → 1.0.0 (Initial ratification)
+Modified principles: N/A (new constitution)
+Added sections:
+  - Core Principles (6 principles)
+  - Development Standards
+  - Deployment & Validation
+  - Governance
+Removed sections: None
+Templates requiring updates:
+  ✅ plan-template.md - Constitution Check section validated for compatibility
+  ✅ spec-template.md - Requirements align with accuracy, reproducibility, and clarity principles
+  ✅ tasks-template.md - Task categorization compatible with book generation workflow
+Follow-up TODOs: None - all placeholders resolved
+-->
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Generation
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Every book component MUST be generated through explicit, documented spec-driven prompts. No content may be manually created outside the Spec-Kit Plus workflow. All structural decisions, content organization, and technical implementations MUST be traceable to a specification document.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Ensures reproducibility, maintainability, and adherence to the AI/Spec-Driven Development methodology that is the subject matter of the book itself.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Technical Accuracy
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Every technical claim, command, code snippet, and deployment step MUST be verified against official Docusaurus documentation and tested in a real environment. No assumed or inferred technical details are permitted. When using Docusaurus features, the Context7 MCP Server MUST be consulted for up-to-date documentation.
 
-### [PRINCIPLE_6_NAME]
+**Rationale**: Readers depend on accurate, working instructions. Unverified claims undermine trust and create frustration when steps fail during reproduction.
 
+### III. Reproducibility
 
-[PRINCIPLE__DESCRIPTION]
+All instructions and workflows MUST be reproducible by following the book sequentially from start to finish. Each step MUST include explicit commands, expected outputs, and clear success criteria. Prerequisites MUST be stated upfront with verification steps.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: A deployment guide is only valuable if readers can successfully execute every step without prior knowledge or additional research.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Clarity Over Brevity
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+Technical explanations MUST prioritize comprehension over conciseness. Each concept MUST include context, rationale, and practical examples. Code snippets MUST be complete and runnable, not abbreviated. Complex topics MUST follow a logical progression from fundamentals to advanced usage.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Developers learning Docusaurus deployment need understanding, not just commands to copy. Clear explanations enable problem-solving when unexpected issues arise.
+
+### V. Docusaurus MCP Server Integration
+
+All Docusaurus-specific information, features, configurations, and best practices MUST be sourced from the Docusaurus MCP Server via Context7. Direct assumptions about Docusaurus functionality without verification are prohibited.
+
+**Rationale**: Docusaurus evolves rapidly. The MCP Server ensures current, accurate documentation rather than outdated assumptions.
+
+### VI. GitHub Pages Deployment Focus
+
+The book MUST culminate in a successful GitHub Pages deployment. All setup, configuration, and build steps MUST be validated against GitHub Pages hosting requirements. Alternative deployment targets are out of scope unless explicitly specified as extensions.
+
+**Rationale**: GitHub Pages is the defined deployment target. Focus ensures depth and completeness for this specific platform rather than superficial coverage of many options.
+
+## Development Standards
+
+### Markdown Quality
+
+- All content MUST be valid Markdown compatible with Docusaurus (MDX support where needed)
+- Code blocks MUST specify language for syntax highlighting
+- Internal links MUST use relative paths and be validated
+- Images and assets MUST be properly referenced and optimized
+- Frontmatter MUST follow Docusaurus conventions
+
+### Code Examples
+
+- All code snippets MUST be tested and verified working
+- Configuration examples MUST match current Docusaurus best practices
+- Shell commands MUST be tested on the target platform (Windows/Linux/macOS specifics documented)
+- Error cases and troubleshooting MUST be included where relevant
+
+### Structure and Organization
+
+- Content MUST follow a logical learning progression: setup → writing → configuration → build → deployment
+- Each chapter MUST have clear learning objectives and outcomes
+- Cross-references between sections MUST be explicit and navigable
+- Table of contents MUST accurately reflect content hierarchy
+
+### Testing Requirements
+
+- The complete workflow (setup through deployment) MUST be tested end-to-end
+- Each deployment step MUST be verified against a real GitHub repository
+- Build commands MUST be executed and output validated
+- Deployed site MUST be accessible and functional on GitHub Pages
+
+## Deployment & Validation
+
+### Pre-Deployment Checklist
+
+- [ ] All Docusaurus features used are documented from MCP Server
+- [ ] All commands tested and verified working
+- [ ] All links (internal and external) validated
+- [ ] Build succeeds without errors or warnings
+- [ ] Site deploys successfully to GitHub Pages
+- [ ] Deployed site renders correctly in major browsers
+- [ ] All code examples tested and working
+- [ ] Search functionality operational (if enabled)
+
+### Success Validation
+
+A successful deployment MUST satisfy:
+
+1. **Build Success**: `npm run build` completes without errors
+2. **Deployment Success**: Site is accessible at the expected GitHub Pages URL
+3. **Content Integrity**: All pages render correctly with proper formatting
+4. **Navigation**: All navigation elements function correctly
+5. **Reproducibility**: Following the book instructions produces an identical working deployment
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other development practices and preferences for this project. Any deviation requires explicit justification documented as an Architecture Decision Record (ADR).
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+### Amendment Process
+
+1. Proposed amendments MUST be documented with rationale
+2. Impact analysis MUST assess affected templates and workflows
+3. Version MUST be incremented using semantic versioning:
+   - **MAJOR**: Backward-incompatible principle changes or removals
+   - **MINOR**: New principles or substantial expansions
+   - **PATCH**: Clarifications, wording improvements, non-semantic fixes
+4. All dependent templates MUST be updated for consistency
+
+### Compliance and Review
+
+- All specifications MUST reference and comply with these principles
+- All pull requests MUST be reviewed for constitutional compliance
+- Complexity additions MUST be justified in implementation plans
+- Constitution violations MUST be documented with explicit rationale
+
+### Runtime Guidance
+
+For detailed development workflow and agent-specific instructions, refer to `CLAUDE.md` (agent runtime guidance) and command files in `.specify/templates/commands/`.
+
+**Version**: 1.0.0 | **Ratified**: 2025-12-04 | **Last Amended**: 2025-12-04
