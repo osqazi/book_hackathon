@@ -15,15 +15,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://yourusername.github.io',
+  url: 'https://osqazi.github.io/humanoid-robotics-book/docs/intro',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/humanoid-robotics-book/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'yourusername', // Usually your GitHub org/user name.
-  projectName: 'humanoid-robotics-book', // Usually your repo name.
+  organizationName: 'osqazi', // Usually your GitHub org/user name.
+  projectName: 'book_hackathon', // Usually your repo name.
 
   onBrokenLinks: 'warn', // TODO: Change to 'throw' after adding proper landing page/routing
 
@@ -77,7 +77,7 @@ const config: Config = {
           label: 'Book',
         },
         {
-          href: 'https://github.com/yourusername/humanoid-robotics-book',
+          href: 'https://github.com/osqazi/book_hackathon',
           label: 'GitHub',
           position: 'right',
         },
