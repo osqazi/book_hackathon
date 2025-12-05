@@ -60,12 +60,14 @@ const sidebars = {
       type: 'category',
       label: 'Module 4: Vision-Language-Action',
       link: {
-        type: 'generated-index',
-        title: 'Vision-Language-Action Integration',
-        description: 'Build autonomous humanoid systems with LLMs and multimodal perception',
+        type: 'doc',
+        id: 'module-4-vla/index',
       },
       items: [
-        // Will be populated with module-4-vla pages
+        'module-4-vla/llm-planning',
+        'module-4-vla/whisper',
+        'module-4-vla/multimodal',
+        'module-4-vla/architecture',
       ],
     },
     'references',
