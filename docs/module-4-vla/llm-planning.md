@@ -370,11 +370,137 @@ Executing: navigate to counter
 Executing: place on counter
 ```
 
+## Advanced Error Handling
+
+### Handling Ambiguous Commands
+
+Real users don't speak precisely. The LLM must request clarification when needed:
+
+```python
+AMBIGUITY_HANDLER_PROMPT = """
+If the command is ambiguous, return a clarification request instead of a plan.
+
+Examples of ambiguous commands:
+- "Pick it up" → What object?
+- "Go there" → Where specifically?
+- "Bring me one" → One of what?
+- "Clean up" → Clean what area?
+
+Response format for ambiguous commands:
+{
+  "needs_clarification": true,
+  "question": "Which object would you like me to pick up?",
+  "options": ["cup", "plate", "book"]  // If detectable
+}
+"""
+
+# Example interaction
+user: "Pick it up"
+llm: {"needs_clarification": true, "question": "What would you like me to pick up?"}
+user: "The red cup"
+llm: {"plan": [{"action": "grasp", "object": "red cup"}, ...]}
+```
+
+### Handling Partial Failures
+
+When part of a plan fails, the LLM can adapt:
+
+```python
+def execute_with_adaptation(plan):
+    completed_actions = []
+
+    for i, action in enumerate(plan):
+        result = robot.execute(action)
+
+        if result.success:
+            completed_actions.append(action)
+        else:
+            # Replan from current state
+            replan_prompt = f"""
+            Original goal: {original_command}
+
+            Completed successfully:
+            {completed_actions}
+
+            Failed action: {action}
+            Error: {result.error}
+
+            Remaining actions: {plan[i+1:]}
+
+            Generate a new plan to achieve the goal from current state.
+            You may need to:
+            - Skip the failed action if not critical
+            - Find an alternative approach
+            - Ask for human help if truly stuck
+            """
+
+            new_plan = llm.generate(replan_prompt)
+            return execute_with_adaptation(new_plan)
+
+    return True
+```
+
+**Example Scenario**:
+```
+Original Plan: Navigate to kitchen → Grasp cup → Navigate to user
+Failed at: Grasp cup (cup too far from edge, out of reach)
+
+Replanned:
+1. Navigate closer to counter (adjust position)
+2. Retry grasp
+3. If still fails, ask user: "Could you move the cup closer to the edge?"
+```
+
+### Handling Resource Constraints
+
+LLMs must consider battery, payload capacity, and time constraints:
+
+```python
+RESOURCE_AWARE_PROMPT = """
+Robot state:
+- Battery: {battery_level}% (return to charger below 20%)
+- Current payload: {current_weight}kg / {max_weight}kg max
+- Time available: {time_budget} minutes
+
+Generate a plan that:
+1. Completes before battery critical
+2. Doesn't exceed weight capacity
+3. Finishes within time budget
+
+If impossible, explain which constraint is violated and suggest alternatives.
+"""
+
+# Example output when battery low:
+{
+  "plan": [
+    {"action": "navigate", "location": "charger"},
+    {"action": "charge", "duration": 30},
+    {"action": "navigate", "location": "kitchen"},
+    {"action": "grasp", "object": "cup"}
+  ],
+  "reasoning": "Battery at 15%, recharging first to avoid mid-task shutdown"
+}
+```
+
 ## Best Practices
 
 ### 1. Provide Rich Context
 
 Include environment state, robot capabilities, and constraints in every prompt.
+
+```python
+def build_context_prompt(robot_state):
+    return f"""
+    Robot capabilities: {robot_state.capabilities}
+    Current location: {robot_state.location}
+    Battery level: {robot_state.battery}%
+    Objects in view: {robot_state.detected_objects}
+    Recent actions: {robot_state.action_history[-3:]}
+    Known locations: {robot_state.semantic_map.locations}
+
+    User command: {{command}}
+    """
+```
 
 ### 2. Use Structured Output
 
@@ -412,6 +538,8 @@ SAFETY RULES:
 - Never navigate while holding fragile objects
 - Stop immediately if person is detected in path
 - Do not grasp sharp objects without confirmation
+- Confirm before discarding any object
+- Maintain 0.5m distance from people while navigating
 ```
 
 ### 5. Graceful Failure
@@ -422,8 +550,44 @@ Prompt LLM to explain when tasks are impossible:
 {
   "plan": null,
   "impossible": true,
-  "reason": "Cannot grasp the car—it exceeds the 5kg weight limit."
+  "reason": "Cannot grasp the car—it exceeds the 5kg weight limit.",
+  "alternative": "I could push the car if it has wheels, or I can call for human assistance."
 }
+```
+
+### 6. Multi-Step Validation
+
+Validate plans before execution at multiple levels:
+
+```python
+def validate_plan_comprehensively(plan):
+    # Syntax validation
+    if not is_valid_json(plan):
+        return False, "Invalid JSON format"
+
+    # Action validation
+    for action in plan:
+        if action["action"] not in VALID_ACTIONS:
+            return False, f"Unknown action: {action['action']}"
+
+    # Physics validation
+    for action in plan:
+        if not is_physically_feasible(action):
+            return False, f"Infeasible action: {action}"
+
+    # Safety validation
+    for action in plan:
+        if violates_safety_constraint(action):
+            return False, f"Unsafe action: {action}"
+
+    # Temporal validation (can complete before battery dies?)
+    estimated_time = sum(estimate_duration(a) for a in plan)
+    battery_time = battery_level / battery_consumption_rate
+
+    if estimated_time > battery_time:
+        return False, "Insufficient battery to complete plan"
+
+    return True, "Plan validated"
 ```
 
 ## Summary

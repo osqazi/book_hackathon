@@ -522,6 +522,200 @@ wer = compute_wer(reference, hypothesis)
 print(f"WER: {wer * 100:.1f}%")  # Target: less than 5%
 ```
 
+## Production Optimization
+
+### GPU Acceleration
+
+Whisper runs significantly faster on GPUs:
+
+```python
+# CPU vs GPU performance comparison
+model_cpu = whisper.load_model("small", device="cpu")
+model_gpu = whisper.load_model("small", device="cuda")
+
+audio = load_audio("command.wav")
+
+# CPU inference
+start = time.time()
+result_cpu = model_cpu.transcribe(audio)
+cpu_time = time.time() - start  # ~3-5 seconds
+
+# GPU inference
+start = time.time()
+result_gpu = model_gpu.transcribe(audio)
+gpu_time = time.time() - start  # ~0.5-1.5 seconds
+
+print(f"Speedup: {cpu_time / gpu_time:.1f}x faster on GPU")
+# Typical output: Speedup: 4-6x faster on GPU
+```
+
+**Optimization Tips:**
+- Keep model loaded in VRAM (don't reload per request)
+- Batch multiple audio chunks when possible
+- Use FP16 precision for 2x speedup with minimal quality loss
+- Consider model quantization (INT8) for edge devices
+
+### Model Quantization
+
+Reduce model size and inference time:
+
+```python
+# Quantize Whisper to INT8 (reduces size by 4x)
+from optimum.onnxruntime import ORTModelForSpeechSeq2Seq
+
+model = ORTModelForSpeechSeq2Seq.from_pretrained(
+    "openai/whisper-small",
+    export=True,
+    quantization_config="arm64"  # or "avx512" for x86
+)
+
+# INT8 model: 250MB vs 1GB for FP32
+# Inference: ~2x faster with <2% accuracy drop
+```
+
+### Streaming Recognition
+
+For interactive systems, stream partial results:
+
+```python
+import whisper
+from whisper.audio import SAMPLE_RATE
+
+class StreamingWhisper(Node):
+    def __init__(self):
+        super().__init__('streaming_whisper')
+
+        self.model = whisper.load_model("small")
+        self.buffer_duration = 5  # seconds
+        self.audio_buffer = []
+
+    def audio_callback(self, msg):
+        self.audio_buffer.extend(msg.audio.data)
+
+        # Process every 5 seconds
+        if len(self.audio_buffer) >= SAMPLE_RATE * self.buffer_duration:
+            # Transcribe buffer
+            audio = np.array(self.audio_buffer[-SAMPLE_RATE*self.buffer_duration:])
+            result = self.model.transcribe(audio)
+
+            # Publish partial result
+            self.publish_partial_transcript(result["text"])
+
+            # Keep last 2 seconds for context
+            self.audio_buffer = self.audio_buffer[-SAMPLE_RATE*2:]
+```
+
+**Benefits:**
+- Lower perceived latency (user sees progress)
+- Can interrupt robot mid-command
+- Better for long commands or conversations
+
+### Language Detection and Multilingual Support
+
+Auto-detect user language:
+
+```python
+def transcribe_multilingual(audio):
+    # Detect language
+    model = whisper.load_model("small")
+    audio_segment = whisper.pad_or_trim(audio)
+    mel = whisper.log_mel_spectrogram(audio_segment).to(model.device)
+
+    _, probs = model.detect_language(mel)
+    detected_language = max(probs, key=probs.get)
+
+    print(f"Detected language: {detected_language} ({probs[detected_language]*100:.1f}%)")
+
+    # Transcribe in detected language
+    result = model.transcribe(audio, language=detected_language)
+
+    return result["text"], detected_language
+
+# Example usage
+text, lang = transcribe_multilingual(audio)
+# Output: Detected language: es (98.5%)
+#         "Tráeme un vaso de agua"
+
+# Can also translate to English
+result = model.transcribe(audio, task="translate")
+# Output: "Bring me a glass of water"
+```
+
+**Applications:**
+- Hotels serving international guests
+- Multilingual eldercare facilities
+- Export markets with diverse users
+
+### Domain Adaptation with Prompting
+
+Improve accuracy for robotics jargon:
+
+```python
+# Add context prompt for robotics terminology
+result = model.transcribe(
+    audio,
+    initial_prompt="This is a voice command for a humanoid robot. Common commands include navigate, grasp, place, detect objects, and clean."
+)
+
+# Without prompt: "navi gate to kitchen" (incorrect spacing)
+# With prompt: "navigate to kitchen" (correct)
+
+# Can also bias toward specific vocabulary
+result = model.transcribe(
+    audio,
+    initial_prompt="Vocabulary: ROS, Nav2, MoveIt, Isaac Sim, Visual SLAM"
+)
+```
+
+### Error Recovery Strategies
+
+Handle recognition errors gracefully:
+
+```python
+class RobustVoiceCommandSystem(Node):
+    def __init__(self):
+        super().__init__('robust_voice')
+        self.model = whisper.load_model("small")
+        self.confidence_threshold = 0.7
+
+    def process_command(self, audio):
+        # Transcribe
+        result = self.model.transcribe(audio, word_timestamps=True)
+
+        # Check confidence via word-level scores
+        avg_confidence = np.mean([
+            word['probability']
+            for word in result.get('words', [])
+        ])
+
+        if avg_confidence < self.confidence_threshold:
+            # Low confidence, ask for repeat
+            self.speak("I didn't catch that. Could you repeat?")
+            return None
+
+        # Check for nonsensical output (gibberish detection)
+        if contains_gibberish(result["text"]):
+            self.speak("I didn't understand. Please try again.")
+            return None
+
+        # Valid command
+        return result["text"]
+
+def contains_gibberish(text):
+    """Heuristic gibberish detection"""
+    words = text.split()
+
+    # Too many short words
+    if sum(len(w) <= 2 for w in words) / len(words) > 0.5:
+        return True
+
+    # Check against vocabulary
+    valid_words = set(load_english_vocabulary())
+    unknown_ratio = sum(w.lower() not in valid_words for w in words) / len(words)
+
+    return unknown_ratio > 0.4  # >40% unknown words
+```
+
 ## Summary
 
 Whisper enables natural voice interaction for humanoid robots:
@@ -537,16 +731,24 @@ Whisper enables natural voice interaction for humanoid robots:
 - Real-time transcription publishing
 - Integration with LLM planner for action decomposition
 
+**Production Optimizations:**
+- GPU acceleration (4-6x speedup)
+- Model quantization for edge deployment
+- Streaming recognition for low latency
+- Domain adaptation with prompting
+- Multilingual auto-detection
+
 **Best Practices:**
 - Use `small` model for speed/accuracy balance
 - Apply VAD to avoid transcribing silence
 - Use wake word detection in noisy environments
 - Microphone arrays for directional audio capture
+- Confidence thresholding for error recovery
 
 **Limitations:**
-- 1-3 second latency (not real-time)
+- 1-3 second latency (not real-time for full transcription, but can stream)
 - GPU recommended for fast inference
-- Struggles with extreme accents or domain-specific jargon
+- Struggles with extreme accents or domain-specific jargon without prompting
 
 **Next:** Learn how to ground language in visual perception with multimodal models.
 

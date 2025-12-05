@@ -190,17 +190,23 @@ This speed enables real-time autonomy on resource-constrained platforms like NVI
 - Depth perception identifies obstacles (boxes, people, forklifts)
 - Trained on synthetic warehouse scenes in Isaac Sim
 
+**Deployment Example**: Amazon and other logistics companies are exploring humanoid robots for warehouse tasks. These robots use GPU-accelerated Visual SLAM to navigate dynamic environments with constantly moving inventory and personnel. Isaac Sim allows training on thousands of warehouse configurations without disrupting actual operations, generating diverse scenarios including peak hours, low-light conditions, and emergency situations.
+
 ### Home Service Robots
 - Object detection finds target items (cups, tools, packages)
 - Navigation to target locations using SLAM maps
 - Manipulation guided by depth perception
 - Tested in photorealistic home environments
 
+**Deployment Example**: Home service humanoids must navigate cluttered, unstructured environments with variable lighting. Training in Isaac Sim enables testing across different home layouts, furniture arrangements, and lighting conditions—from bright daylight to dim evening ambiance. This synthetic training helps robots generalize to any home without requiring data collection in thousands of real houses.
+
 ### Human-Robot Interaction
 - Person detection and tracking
 - Social navigation (maintain comfortable distance)
 - Gesture recognition for commands
 - Trained on synthetic datasets with diverse human models
+
+**Deployment Example**: Service robots in hospitals, hotels, and retail spaces must navigate around people safely and naturally. Isaac Sim's photorealistic human models enable training social navigation behaviors with diverse populations, testing personal space preferences, and validating safety protocols—all before deployment in real public spaces.
 
 ## Learning Path
 

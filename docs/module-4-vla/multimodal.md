@@ -530,6 +530,394 @@ navigate(user_position)
 place(table_position)
 ```
 
+## Advanced Grounding Techniques
+
+### Visual Question Answering (VQA) for Verification
+
+After detecting an object, verify it matches the command using VQA:
+
+```python
+from transformers import ViltProcessor, ViltForQuestionAnswering
+
+class GroundingVerifier(Node):
+    def __init__(self):
+        super().__init__('grounding_verifier')
+
+        # Load VQA model
+        self.vqa_processor = ViltProcessor.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
+        self.vqa_model = ViltForQuestionAnswering.from_pretrained("dandelin/vilt-b32-finetuned-vqa")
+
+    def verify_detection(self, image, bbox, expected_object):
+        """
+        Verify that detected bounding box contains the expected object.
+
+        Example:
+        Command: "Pick up the red cup"
+        Detected: bbox at [320, 240, 150, 200]
+        Verify: Is this actually a red cup?
+        """
+
+        # Crop to bounding box
+        x, y, w, h = bbox
+        cropped_image = image[y:y+h, x:x+w]
+
+        # Ask VQA model
+        questions = [
+            f"Is this a {expected_object}?",
+            f"What color is this {expected_object.split()[-1]}?",  # "red cup" → "cup"
+            "What object is this?"
+        ]
+
+        answers = []
+        for question in questions:
+            inputs = self.vqa_processor(cropped_image, question, return_tensors="pt")
+            outputs = self.vqa_model(**inputs)
+            logits = outputs.logits
+            answer_idx = logits.argmax(-1).item()
+            answer = self.vqa_model.config.id2label[answer_idx]
+            answers.append(answer)
+
+        # Verify answers match expectations
+        if expected_object in answers[0].lower() and answers[0].lower() == "yes":
+            self.get_logger().info(f"Verified: {expected_object}")
+            return True
+        else:
+            self.get_logger().warn(f"Verification failed: expected '{expected_object}', but VQA says '{answers[2]}'")
+            return False
+```
+
+**Application**: Reduces false positives from object detection, especially in cluttered environments.
+
+### Scene Graphs for Complex Spatial Reasoning
+
+Build a scene graph to understand object relationships:
+
+```python
+from scene_graph_benchmark.scene_parser import SceneParser
+
+class SceneGraphGrounding(Node):
+    def __init__(self):
+        super().__init__('scene_graph_grounding')
+        self.parser = SceneParser()
+
+    def parse_scene(self, image):
+        """
+        Generate scene graph with object relationships.
+
+        Scene Graph:
+        - cup [on] table
+        - book [next to] cup
+        - person [behind] table
+        """
+
+        scene_graph = self.parser.parse(image)
+
+        # Example output:
+        # {
+        #   "objects": [
+        #     {"id": 0, "label": "cup", "bbox": [320, 240, 80, 120]},
+        #     {"id": 1, "label": "table", "bbox": [100, 300, 600, 200]},
+        #     {"id": 2, "label": "book", "bbox": [450, 250, 100, 80]}
+        #   ],
+        #   "relationships": [
+        #     {"subject": 0, "predicate": "on", "object": 1},  # cup on table
+        #     {"subject": 2, "predicate": "next_to", "object": 0}  # book next to cup
+        #   ]
+        # }
+
+        return scene_graph
+
+    def ground_with_relationships(self, command, scene_graph):
+        """
+        Ground referring expression using relationships.
+
+        Command: "Pick up the cup on the table"
+        → Find cup object
+        → Verify it has "on" relationship with table
+        """
+
+        # Parse command for relationships
+        if "on the table" in command:
+            # Find table object
+            table = next(o for o in scene_graph["objects"] if o["label"] == "table")
+
+            # Find objects on table
+            on_table_ids = [
+                r["subject"]
+                for r in scene_graph["relationships"]
+                if r["predicate"] == "on" and r["object"] == table["id"]
+            ]
+
+            # Filter for cup
+            cups_on_table = [
+                o for o in scene_graph["objects"]
+                if o["label"] == "cup" and o["id"] in on_table_ids
+            ]
+
+            return cups_on_table[0]  # Return first matching cup
+```
+
+### Handling Negations and Exclusions
+
+Support commands like "pick up the cup that's NOT red":
+
+```python
+def ground_with_negation(command, image):
+    """
+    Handle negative constraints in commands.
+
+    Examples:
+    - "Pick up the cup that's not red"
+    - "Bring me a book, but not the blue one"
+    - "Navigate to any table except the one in the kitchen"
+    """
+
+    # Parse negation
+    if "not" in command or "except" in command:
+        # Extract base object and negated property
+        if "not red" in command:
+            base_object = "cup"
+            excluded_property = "red"
+
+            # Detect all cups
+            all_cups = owl_vit.detect(image, "a cup")
+
+            # Filter by color exclusion
+            non_red_cups = []
+            for cup in all_cups:
+                # Check color
+                color = clip.classify(
+                    crop_bbox(image, cup.bbox),
+                    labels=["red", "blue", "white", "black", "green"]
+                )
+
+                if color != "red":
+                    non_red_cups.append(cup)
+
+            return non_red_cups[0]  # Return first non-red cup
+```
+
+### Temporal Reasoning for Dynamic Scenes
+
+Track objects across time for temporal commands:
+
+```python
+class TemporalGrounding(Node):
+    def __init__(self):
+        super().__init__('temporal_grounding')
+
+        self.object_history = {}  # {object_id: [detection_t0, detection_t1, ...]}
+
+    def update(self, detections, timestamp):
+        """
+        Track objects over time.
+
+        Enables commands like:
+        - "Pick up the cup that just moved"
+        - "Bring me the object that was on the table a minute ago"
+        - "Navigate to where you saw the person last"
+        """
+
+        for det in detections:
+            obj_id = det.id
+
+            if obj_id not in self.object_history:
+                self.object_history[obj_id] = []
+
+            self.object_history[obj_id].append({
+                "timestamp": timestamp,
+                "bbox": det.bbox,
+                "position_3d": det.position_3d
+            })
+
+    def ground_temporal_query(self, query):
+        """
+        Query: "the cup that just moved"
+        → Find object with highest recent position change
+        """
+
+        if "just moved" in query:
+            # Calculate recent motion for all objects
+            motion_scores = {}
+
+            for obj_id, history in self.object_history.items():
+                if len(history) < 2:
+                    continue
+
+                # Compare last 2 positions
+                recent_positions = [h["position_3d"] for h in history[-5:]]
+                motion = np.std(recent_positions, axis=0)  # Standard deviation
+                motion_magnitude = np.linalg.norm(motion)
+
+                motion_scores[obj_id] = motion_magnitude
+
+            # Return object with most motion
+            moving_object_id = max(motion_scores, key=motion_scores.get)
+            return self.get_current_detection(moving_object_id)
+
+        elif "was on the table" in query and "ago" in query:
+            # Find object that was on table in past
+            time_delta = parse_time_delta(query)  # "a minute ago" → 60 seconds
+            target_timestamp = time.time() - time_delta
+
+            # Search history for object on table at target time
+            for obj_id, history in self.object_history.items():
+                for h in history:
+                    if abs(h["timestamp"] - target_timestamp) < 5:  # Within 5s
+                        if self.was_on_table(h["position_3d"]):
+                            return self.get_current_detection(obj_id)
+```
+
+### Compositional Grounding for Complex Descriptions
+
+Handle multi-attribute descriptions:
+
+```python
+def ground_compositional(command, image):
+    """
+    Complex description: "the small red cup next to the blue plate on the left side of the table"
+
+    Strategy:
+    1. Parse into components: [small, red, cup, next_to, blue plate, left side, table]
+    2. Ground each component independently
+    3. Combine with logical AND
+    """
+
+    components = parse_description(command)
+    # {
+    #   "object": "cup",
+    #   "attributes": ["small", "red"],
+    #   "spatial": "left side of table",
+    #   "relations": ["next to blue plate"]
+    # }
+
+    # Step 1: Detect all cups
+    candidates = owl_vit.detect(image, "a cup")
+
+    # Step 2: Filter by attributes
+    for attr in components["attributes"]:
+        if attr == "small":
+            candidates = [c for c in candidates if is_small(c)]
+        elif attr == "red":
+            color_candidates = []
+            for c in candidates:
+                color = classify_color(crop_bbox(image, c.bbox))
+                if color == "red":
+                    color_candidates.append(c)
+            candidates = color_candidates
+
+    # Step 3: Filter by spatial constraints
+    if "left side" in components["spatial"]:
+        table = detect_table(image)
+        table_center_x = table.bbox.center_x
+        candidates = [c for c in candidates if c.bbox.center_x < table_center_x]
+
+    # Step 4: Filter by relations
+    if "next to blue plate" in components["relations"]:
+        blue_plate = detect_blue_plate(image)
+        candidates = [
+            c for c in candidates
+            if is_next_to(c.bbox, blue_plate.bbox, threshold=100)  # pixels
+        ]
+
+    # Return best match
+    return candidates[0] if candidates else None
+```
+
+## Production Deployment Considerations
+
+### Latency Optimization
+
+Vision-language models can be slow. Optimize for real-time performance:
+
+```python
+class OptimizedGroundingPipeline(Node):
+    def __init__(self):
+        super().__init__('optimized_grounding')
+
+        # Pre-load all models at startup
+        self.owl_vit = OwlViTForObjectDetection.from_pretrained("google/owlvit-base-patch32")
+        self.owl_vit.to("cuda")  # Move to GPU
+        self.owl_vit.eval()  # Inference mode
+
+        self.sam = SamPredictor(sam_model_registry["vit_h"](checkpoint="sam_vit_h.pth"))
+
+        # Cache recent detections (avoid recomputing)
+        self.detection_cache = {}
+        self.cache_ttl = 2.0  # seconds
+
+    def detect_with_cache(self, image, query):
+        """Use cached detections if available and recent"""
+
+        cache_key = f"{hash_image(image)}_{query}"
+
+        if cache_key in self.detection_cache:
+            cached_detection, timestamp = self.detection_cache[cache_key]
+            if time.time() - timestamp < self.cache_ttl:
+                self.get_logger().info("Using cached detection")
+                return cached_detection
+
+        # Run detection
+        detection = self.owl_vit.detect(image, query)
+        self.detection_cache[cache_key] = (detection, time.time())
+
+        return detection
+```
+
+**Performance Targets:**
+- Object detection: &lt;200ms
+- Segmentation: &lt;100ms
+- Total grounding latency: &lt;500ms
+
+### Failure Recovery
+
+Handle grounding failures gracefully:
+
+```python
+class RobustGroundingNode(Node):
+    def ground_with_retry(self, command, max_attempts=3):
+        """Retry grounding with progressively relaxed constraints"""
+
+        for attempt in range(max_attempts):
+            try:
+                # Attempt 1: Strict matching
+                if attempt == 0:
+                    result = self.ground_strict(command)
+
+                # Attempt 2: Relaxed constraints
+                elif attempt == 1:
+                    self.get_logger().warn("Strict grounding failed, relaxing constraints")
+                    result = self.ground_relaxed(command)
+
+                # Attempt 3: Ask user for help
+                else:
+                    self.get_logger().error("Grounding failed, requesting user help")
+                    self.speak("I can't find that object. Could you point to it or describe it differently?")
+                    return None
+
+                if result:
+                    return result
+
+            except Exception as e:
+                self.get_logger().error(f"Grounding attempt {attempt+1} failed: {e}")
+
+        return None
+
+    def ground_relaxed(self, command):
+        """Lower confidence thresholds and try multiple query phrasings"""
+
+        # Try multiple phrasings
+        queries = generate_query_variations(command)
+        # "red cup" → ["a red cup", "red ceramic cup", "red mug", "cup that is red"]
+
+        for query in queries:
+            detections = self.owl_vit.detect(image, query, confidence_threshold=0.2)  # Lower threshold
+            if detections:
+                return detections[0]
+
+        return None
+```
+
 ## Summary
 
 Multimodal perception enables robots to understand visually-grounded commands:
@@ -538,23 +926,42 @@ Multimodal perception enables robots to understand visually-grounded commands:
 - **CLIP**: Zero-shot image-text similarity
 - **OWL-ViT**: Open-vocabulary object detection
 - **SAM**: Pixel-perfect segmentation masks
+- **VQA**: Visual question answering for verification
+- **Scene Graphs**: Understanding object relationships
 
 **Grounding Pipeline:**
 1. Parse natural language command
-2. Extract object description
+2. Extract object description and constraints
 3. Detect object in camera image
-4. Segment object for grasp planning
-5. Execute action with 3D pose
+4. Verify detection with VQA or secondary checks
+5. Segment object for grasp planning
+6. Execute action with 3D pose
+
+**Advanced Techniques:**
+- Compositional grounding for complex multi-attribute descriptions
+- Temporal reasoning for dynamic scenes and motion
+- Negation handling ("not red", "except")
+- Scene graph reasoning for spatial relationships
+- Multi-modal verification to reduce false positives
 
 **Challenges:**
 - Ambiguous referring expressions ("the cup" → which cup?)
 - Partial observability (occluded objects)
 - Spatial reasoning (left/right, near/far)
+- Latency constraints for real-time interaction
 
 **Solutions:**
 - Multi-constraint filtering (color + size + position)
 - Context tracking (user gaze, recent mentions)
 - Object tracking over time
+- Caching and model optimization for speed
+- Graceful degradation with retry strategies
+
+**Production Considerations:**
+- Target &lt;500ms total grounding latency
+- Cache recent detections
+- Implement retry with relaxed constraints
+- Always verify detections before execution
 
 **Next:** Integrate everything into a complete VLA architecture.
 

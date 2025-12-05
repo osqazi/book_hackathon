@@ -534,6 +534,175 @@ def generate_launch_description():
     ])
 ```
 
+## Debugging and Troubleshooting
+
+### Common VLA System Failures
+
+**1. Speech Recognition Failures**
+
+```
+Symptom: Whisper outputs garbled text or empty strings
+Causes:
+- Background noise overwhelming speech
+- Microphone too far from speaker
+- Low audio volume
+- Wrong language model loaded
+
+Debugging:
+1. Check audio levels: ros2 topic echo /audio/input
+2. Record raw audio and test Whisper offline
+3. Verify microphone gain settings
+4. Test with synthetic TTS audio (eliminates mic issues)
+
+Fix:
+- Adjust VAD sensitivity
+- Use noise cancellation (RNN Noise Suppression)
+- Move to directional microphone or array
+- Add wake word detection to segment speech
+```
+
+**2. LLM Planning Failures**
+
+```
+Symptom: LLM generates infeasible or nonsensical plans
+Causes:
+- Insufficient context in prompt
+- Hallucination (LLM invents capabilities)
+- Prompt injection attack
+- Outdated robot state information
+
+Debugging:
+1. Log full LLM prompt + response
+2. Manually test prompt in ChatGPT/Claude web UI
+3. Check if robot state is current
+4. Validate action constraints
+
+Fix:
+- Enrich prompt with environment state
+- Add validation layer before execution
+- Use constrained decoding (force JSON schema)
+- Implement prompt versioning and A/B testing
+```
+
+**3. Grounding Failures**
+
+```
+Symptom: Robot can't locate objects mentioned in command
+Causes:
+- Object not in camera view
+- Poor lighting (overexposed/underexposed)
+- Object occluded by other objects
+- OWL-ViT query phrasing mismatch
+
+Debugging:
+1. Visualize bounding boxes: ros2 run rqt_image_view
+2. Check detection confidence scores
+3. Test with known objects in controlled lighting
+4. Compare CLIP embeddings between query and image
+
+Fix:
+- Add head movement to scan environment
+- Improve lighting or use HDR cameras
+- Try multiple query phrasings ("red cup" vs "a red ceramic mug")
+- Lower confidence threshold (but increases false positives)
+```
+
+**4. Execution Failures**
+
+```
+Symptom: Robot starts action but fails partway through
+Causes:
+- Collision detected by safety systems
+- Joint limits reached (object out of reach)
+- Gripper fails to grasp (slippery object)
+- Lost localization (SLAM drift)
+
+Debugging:
+1. Check TF tree: ros2 run tf2_tools view_frames
+2. Monitor joint states: ros2 topic echo /joint_states
+3. Visualize costmap in RViz (check for phantom obstacles)
+4. Review MoveIt collision scene
+
+Fix:
+- Replan with updated obstacle map
+- Adjust grasp pose (different approach angle)
+- Reset SLAM map and relocalize
+- Reduce velocity limits for more precise control
+```
+
+### Performance Monitoring
+
+```python
+class VLAPerformanceMonitor(Node):
+    def __init__(self):
+        super().__init__('vla_monitor')
+
+        self.metrics = {
+            "whisper_latency": [],
+            "llm_latency": [],
+            "grounding_latency": [],
+            "action_success_rate": [],
+            "total_task_time": []
+        }
+
+    def log_metrics(self):
+        self.get_logger().info(f"""
+        === VLA Performance Metrics ===
+        Whisper avg latency: {np.mean(self.metrics['whisper_latency']):.2f}s
+        LLM avg latency: {np.mean(self.metrics['llm_latency']):.2f}s
+        Grounding avg latency: {np.mean(self.metrics['grounding_latency']):.2f}s
+        Action success rate: {np.mean(self.metrics['action_success_rate'])*100:.1f}%
+        Avg task completion time: {np.mean(self.metrics['total_task_time']):.1f}s
+        """)
+
+    def alert_if_degraded(self):
+        # Alert if latency spikes
+        if np.mean(self.metrics['llm_latency'][-10:]) > 5.0:
+            self.get_logger().warn("LLM latency degraded > 5s")
+
+        # Alert if success rate drops
+        if np.mean(self.metrics['action_success_rate'][-10:]) < 0.7:
+            self.get_logger().error("Action success rate below 70%!")
+```
+
+### Integration Testing Strategy
+
+```python
+def test_vla_pipeline_end_to_end():
+    """Test complete pipeline from speech to execution"""
+
+    # Test 1: Simple navigation command
+    test_audio = load_audio("test_data/bring_me_cup.wav")
+    result = vla_system.execute_audio_command(test_audio)
+
+    assert result.success
+    assert "cup" in result.detected_objects
+    assert result.final_position == "near_user"
+
+    # Test 2: Multi-step task
+    test_audio = load_audio("test_data/clean_table.wav")
+    result = vla_system.execute_audio_command(test_audio)
+
+    assert result.success
+    assert result.actions_completed >= 5  # Detect, grasp, place for multiple objects
+    assert result.objects_cleared_from_table > 0
+
+    # Test 3: Ambiguous command handling
+    test_audio = load_audio("test_data/pick_it_up.wav")
+    result = vla_system.execute_audio_command(test_audio)
+
+    assert result.requested_clarification
+    assert "which object" in result.clarification_question.lower()
+
+    # Test 4: Impossible task handling
+    test_audio = load_audio("test_data/lift_car.wav")
+    result = vla_system.execute_audio_command(test_audio)
+
+    assert not result.success
+    assert result.failure_reason == "exceeds_weight_limit"
+    assert result.alternative_suggested
+```
+
 ## Best Practices
 
 ### 1. Human-in-the-Loop
