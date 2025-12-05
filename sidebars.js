@@ -20,12 +20,13 @@ const sidebars = {
       type: 'category',
       label: 'Module 1: ROS 2 Fundamentals',
       link: {
-        type: 'generated-index',
-        title: 'ROS 2 Fundamentals',
-        description: 'Learn the foundation of humanoid robot control with ROS 2',
+        type: 'doc',
+        id: 'module-1-ros2/index',
       },
       items: [
-        // Will be populated with module-1-ros2 pages
+        'module-1-ros2/nodes-topics',
+        'module-1-ros2/services-actions',
+        'module-1-ros2/urdf-modeling',
       ],
     },
     {
