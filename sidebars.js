@@ -33,12 +33,13 @@ const sidebars = {
       type: 'category',
       label: 'Module 2: Simulation & Digital Twins',
       link: {
-        type: 'generated-index',
-        title: 'Simulation & Digital Twins',
-        description: 'Master physics simulation with Gazebo and Unity',
+        type: 'doc',
+        id: 'module-2-simulation/index',
       },
       items: [
-        // Will be populated with module-2-simulation pages
+        'module-2-simulation/physics-principles',
+        'module-2-simulation/sensors',
+        'module-2-simulation/digital-twin',
       ],
     },
     {
