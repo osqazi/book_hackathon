@@ -10,7 +10,8 @@
       "Bash(else echo \"NOT_FOUND\")",
       "Bash(npx create-docusaurus:*)",
       "Bash(npm install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(if [ -f \"scripts/validate-content.js\" ])"
     ],
     "deny": [],
     "ask": []
