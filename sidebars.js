@@ -46,12 +46,14 @@ const sidebars = {
       type: 'category',
       label: 'Module 3: AI-Driven Perception (NVIDIA Isaac)',
       link: {
-        type: 'generated-index',
-        title: 'AI-Driven Perception',
-        description: 'Advanced perception and navigation with NVIDIA Isaac',
+        type: 'doc',
+        id: 'module-3-isaac/index',
       },
       items: [
-        // Will be populated with module-3-isaac pages
+        'module-3-isaac/isaac-sim',
+        'module-3-isaac/vslam',
+        'module-3-isaac/nav2',
+        'module-3-isaac/synthetic-data',
       ],
     },
     {
