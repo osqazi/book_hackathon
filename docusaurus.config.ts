@@ -122,7 +122,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Built with Docusaurus. Content follows APA 7th edition citation format.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Owais Qazi, MetaLog Inc. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

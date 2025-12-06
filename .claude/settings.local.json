@@ -13,7 +13,10 @@
       "Bash(npm run build:*)",
       "Bash(if [ -f \"scripts/validate-content.js\" ])",
       "Bash(node:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(if [ -d \"history/prompts/general\" ])",
+      "Bash(then ls -1 history/prompts/general)",
+      "Bash(else echo \"General directory does not exist\")"
     ],
     "deny": [],
     "ask": []
