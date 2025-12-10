@@ -20,7 +20,12 @@
       "Bash(curl \"http://localhost:8003/search?query=humanoid&limit=2\")",
       "Bash(timeout 60s uvicorn main:app --host 0.0.0.0 --port 8004)",
       "Bash(curl -X POST \"http://localhost:8004/chat\" -H \"Content-Type: application/json\" -d \"{\"\"query\"\":\"\"What is ROS 2?\"\", \"\"max_tokens\"\": 100, \"\"temperature\"\": 0.7}\")",
-      "Bash(curl \"http://localhost:8004/search?query=ros&limit=2\")"
+      "Bash(curl \"http://localhost:8004/search?query=ros&limit=2\")",
+      "WebSearch",
+      "Bash(curl:*)",
+      "Bash(python -m uvicorn:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []

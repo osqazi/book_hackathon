@@ -54,6 +54,17 @@ class RAGSystem:
         try:
             collections = self.qdrant_client.get_collections()
             collection_exists = any(col.name == self.collection_name for col in collections.collections)
+
+            # If collection exists, check if it has the correct vector dimension
+            if collection_exists:
+                collection_info = self.qdrant_client.get_collection(self.collection_name)
+                vector_size = collection_info.config.params.vectors.size
+
+                # If dimension is wrong (expecting 1024 for Cohere), delete and recreate
+                if vector_size != 1024:
+                    print(f"Collection {self.collection_name} has wrong vector dimension ({vector_size}), recreating with 1024...")
+                    self.qdrant_client.delete_collection(self.collection_name)
+                    collection_exists = False
         except:
             collection_exists = False
 
@@ -68,7 +79,7 @@ class RAGSystem:
             # Add the book content to the collection
             self._add_book_content_to_qdrant()
         else:
-            print(f"Collection {self.collection_name} already exists, skipping initialization")
+            print(f"Collection {self.collection_name} already exists with correct dimensions, skipping initialization")
 
     def extract_content_from_markdown(self, file_path: str) -> List[Dict[str, Any]]:
         """
@@ -284,14 +295,12 @@ class RAGSystem:
             )
             query_embedding = response.embeddings[0]  # Cohere returns embeddings as a list
 
-            # Search in Qdrant - using the correct method name for the newer API
-            from qdrant_client.http.models import SearchRequest
-            search_result = self.qdrant_client.search(
+            # Search in Qdrant using the correct API for v1.x
+            hits = self.qdrant_client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_embedding,
+                query=query_embedding,
                 limit=limit
-            )
-            hits = search_result
+            ).points
 
             results = []
             for hit in hits:
