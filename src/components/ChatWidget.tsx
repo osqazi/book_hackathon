@@ -14,7 +14,7 @@ const ChatWidget = () => {
 
   // Get the backend API URL from environment or use default
   const { siteConfig } = useDocusaurusContext();
-  const backendUrl = siteConfig.customFields?.backendUrl || 'https://osqazi-newchatbot.hf.space';
+  const backendUrl = 'https://osqazi-newchatbot.hf.space'; //|| siteConfig.customFields?.backendUrl ;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
