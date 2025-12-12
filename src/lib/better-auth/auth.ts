@@ -6,6 +6,7 @@ import Database from "better-sqlite3";
 const sqlite = new Database("sqlite.db");
 
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET || "",
   database: drizzleAdapter(sqlite, {
     provider: "sqlite",
   }),

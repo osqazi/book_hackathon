@@ -106,7 +106,9 @@
       "Bash(powershell -Command \"Stop-Process -Id 5876 -Force\")",
       "Bash(powershell -Command:*)",
       "Bash(git rev-parse:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(node -e:*)",
+      "SlashCommand(/sp.phr \"Fixed Better-Auth BETTER_AUTH_SECRET Error on Vercel\" --stage general --json)"
     ],
     "deny": [],
     "ask": []
