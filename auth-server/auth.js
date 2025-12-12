@@ -16,15 +16,14 @@ dotenv.config({ path: join(__dirname, '..', '.env') });
 const baseURL = process.env.AUTH_BASE_URL || 'http://localhost:3001';
 const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-// CRITICAL: Force production mode for HTTPS to ensure SameSite=None
+// CRITICAL: Detect production based on HTTPS
 const isHTTPS = baseURL.startsWith('https://');
-const isLocalhost = baseURL.includes('localhost');
 
-console.log('[Auth Config] Environment detection:', {
+console.log('[Auth Config] Environment:', {
   baseURL,
   isHTTPS,
-  isLocalhost,
-  forcedSameSite: isHTTPS ? 'none' : 'lax'
+  sameSite: isHTTPS ? 'none' : 'lax',
+  secure: isHTTPS
 });
 
 // Define all trusted origins (both dev and production)
@@ -34,18 +33,6 @@ const trustedOrigins = [
   'https://book-hackathon-alpha.vercel.app',
   'https://osqazi.github.io',
 ];
-
-// Cookie configuration - CRITICAL for cross-origin auth
-const cookieConfig = {
-  name: 'better-auth.session_token',
-  options: {
-    httpOnly: true,
-    secure: isHTTPS,
-    sameSite: isHTTPS ? 'none' : 'lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60, // 7 days
-  }
-};
 
 export const auth = betterAuth({
   database: new Pool({
@@ -71,23 +58,28 @@ export const auth = betterAuth({
       },
     },
   },
-  // Session configuration with cookie options
+  // Session configuration
   session: {
-    expiresIn: 7 * 24 * 60 * 60,
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // 5 minutes
-    },
+    expiresIn: 7 * 24 * 60 * 60, // 7 days
   },
-  // Advanced security configuration
+  // Advanced configuration
   advanced: {
+    // CRITICAL: Set default cookie attributes for ALL cookies
+    // This is the correct API for Better Auth
+    defaultCookieAttributes: {
+      sameSite: isHTTPS ? 'none' : 'lax',
+      secure: isHTTPS,
+      httpOnly: true,
+      partitioned: true, // New browser standards for cross-site cookies
+    },
+    // Force secure cookies for HTTPS
     useSecureCookies: isHTTPS,
+    // Cross-subdomain cookies disabled (we're cross-origin, not subdomain)
     crossSubDomainCookies: {
       enabled: false,
     },
-    cookiePrefix: isHTTPS ? '__Secure-' : '',
   },
-  // Email/password auth
+  // Email/password authentication
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
@@ -95,22 +87,11 @@ export const auth = betterAuth({
       minLength: 8,
     },
   },
-  // CRITICAL: Set cookie options at root level
-  cookies: {
-    session_token: {
-      name: isHTTPS ? '__Secure-better-auth.session_token' : 'better-auth.session_token',
-      attributes: {
-        sameSite: isHTTPS ? 'none' : 'lax',
-        secure: isHTTPS,
-        httpOnly: true,
-        path: '/',
-      },
-    },
-  },
 });
 
-console.log('[Auth Config] Cookie configuration:', {
+console.log('[Auth Config] Cookies will use:', {
   sameSite: isHTTPS ? 'none' : 'lax',
   secure: isHTTPS,
-  prefix: isHTTPS ? '__Secure-' : ''
+  httpOnly: true,
+  partitioned: true
 });
