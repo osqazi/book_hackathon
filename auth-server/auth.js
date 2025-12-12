@@ -12,12 +12,22 @@ const __dirname = dirname(__filename);
 // Load environment variables from parent directory
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
-// Determine if we're in production
-const isProduction = process.env.NODE_ENV === 'production';
-
 // Configure base URL and trusted origins based on environment
 const baseURL = process.env.AUTH_BASE_URL || 'http://localhost:3001';
 const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+// Determine if we're in production - check both NODE_ENV and baseURL
+// This ensures cross-origin cookies work correctly even if NODE_ENV isn't set properly
+const isProduction = process.env.NODE_ENV === 'production' ||
+                     baseURL.includes('vercel.app') ||
+                     baseURL.startsWith('https://');
+
+console.log('[Auth Config] Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  baseURL: baseURL,
+  isProduction: isProduction,
+  cookieSameSite: isProduction ? 'none' : 'lax'
+});
 
 // Define all trusted origins (both dev and production)
 const trustedOrigins = [
