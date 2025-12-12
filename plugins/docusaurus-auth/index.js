@@ -30,21 +30,6 @@ module.exports = function (context, options) {
     getClientModules() {
       return [path.resolve(__dirname, './src/AuthProviderWrapper')];
     },
-
-    // Add auth-related scripts
-    injectHtmlTags() {
-      return {
-        headTags: [
-          {
-            tagName: 'script',
-            attributes: {
-              src: '/auth-client.js',
-              type: 'module',
-            },
-          },
-        ],
-      };
-    },
   };
 };
 

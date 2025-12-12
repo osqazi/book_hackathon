@@ -108,7 +108,8 @@
       "Bash(git rev-parse:*)",
       "Bash(git config:*)",
       "Bash(node -e:*)",
-      "SlashCommand(/sp.phr \"Fixed Better-Auth BETTER_AUTH_SECRET Error on Vercel\" --stage general --json)"
+      "SlashCommand(/sp.phr \"Fixed Better-Auth BETTER_AUTH_SECRET Error on Vercel\" --stage general --json)",
+      "SlashCommand(/sp.phr \"Fixed auth-client.js 404 Error on GitHub Pages\" --stage general --json)"
     ],
     "deny": [],
     "ask": []
