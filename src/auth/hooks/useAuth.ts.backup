@@ -1,0 +1,106 @@
+// src/auth/hooks/useAuth.ts
+import { authClient } from '../../lib/better-auth/client';
+import { UserProfile, RegistrationData, SignInData } from '../../models/user';
+import { useEffect, useState } from 'react';
+
+interface UseAuthReturn {
+  user: UserProfile | null;
+  session: any | null;
+  signIn: (data: SignInData) => Promise<any>;
+  signOut: () => Promise<void>;
+  signUp: (data: RegistrationData) => Promise<any>;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+export const useAuth = (): UseAuthReturn => {
+  const [session, setSession] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Initialize session
+  useEffect(() => {
+    const fetchSession = async () => {
+      setIsLoading(true);
+      try {
+        const currentSession = await authClient.getSession();
+        setSession(currentSession?.session || null);
+      } catch (error) {
+        console.error('Failed to get session:', error);
+        setSession(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSession();
+
+    // Set up session change listener if available
+    let unsub: (() => void) | null = null;
+    try {
+      unsub = authClient.useStore((state) => state.session, (newSession) => {
+        setSession(newSession || null);
+      });
+    } catch (error) {
+      console.warn('Could not set up session listener:', error);
+    }
+
+    return () => {
+      if (unsub && typeof unsub === 'function') {
+        unsub();
+      }
+    };
+  }, []);
+
+  const signIn = async (data: SignInData) => {
+    try {
+      const result = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+      });
+      return result;
+    } catch (error) {
+      console.error('Sign in failed:', error);
+      throw error;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await authClient.signOut();
+      setSession(null);
+    } catch (error) {
+      console.error('Sign out failed:', error);
+      throw error;
+    }
+  };
+
+  const signUp = async (data: RegistrationData) => {
+    try {
+      // Sign up the user with email, password, and custom fields
+      const result = await authClient.signUp.email({
+        email: data.email,
+        password: data.password,
+        name: data.email.split('@')[0], // Use part of email as name if no name provided
+        // Include custom fields directly in signup
+        softwareBackground: data.softwareBackground,
+        hardwareBackground: data.hardwareBackground,
+        backgroundComplete: !!(data.softwareBackground || data.hardwareBackground),
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Sign up failed:', error);
+      throw error;
+    }
+  };
+
+  return {
+    user: session?.user || null,
+    session: session || null,
+    signIn,
+    signOut,
+    signUp,
+    isLoading,
+    isAuthenticated: !!session?.user,
+  };
+};

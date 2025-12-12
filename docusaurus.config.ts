@@ -60,6 +60,10 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    './plugins/docusaurus-auth', // Add the auth plugin
+  ],
+
   themes: ['@docusaurus/theme-mermaid'],
 
   markdown: {
@@ -84,6 +88,21 @@ const config: Config = {
           sidebarId: 'mainSidebar',
           position: 'left',
           label: 'Book',
+        },
+        {
+          to: '/signup',
+          label: 'Sign Up',
+          position: 'right',
+        },
+        {
+          to: '/signin',
+          label: 'Sign In',
+          position: 'right',
+        },
+        {
+          to: '/personalization',
+          label: 'Personalization',
+          position: 'right',
         },
         {
           href: 'https://github.com/osqazi/book_hackathon',

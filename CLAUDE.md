@@ -208,3 +208,10 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+## Active Technologies
+- TypeScript/JavaScript (latest stable) + Better-Auth, Docusaurus, React, Drizzle ORM, SQLite/PostgreSQL (002-better-auth-signup)
+- PostgreSQL for production, SQLite for development (002-better-auth-signup)
+
+## Recent Changes
+- 002-better-auth-signup: Added TypeScript/JavaScript (latest stable) + Better-Auth, Docusaurus, React, Drizzle ORM, SQLite/PostgreSQL
