@@ -109,7 +109,12 @@
       "Bash(git config:*)",
       "Bash(node -e:*)",
       "SlashCommand(/sp.phr \"Fixed Better-Auth BETTER_AUTH_SECRET Error on Vercel\" --stage general --json)",
-      "SlashCommand(/sp.phr \"Fixed auth-client.js 404 Error on GitHub Pages\" --stage general --json)"
+      "SlashCommand(/sp.phr \"Fixed auth-client.js 404 Error on GitHub Pages\" --stage general --json)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:book-hackathon-alpha.vercel.app)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
