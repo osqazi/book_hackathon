@@ -16,36 +16,42 @@ dotenv.config({ path: join(__dirname, '..', '.env') });
 const baseURL = process.env.AUTH_BASE_URL || 'http://localhost:3001';
 const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
-// Determine if we're in production - check both NODE_ENV and baseURL
-// This ensures cross-origin cookies work correctly even if NODE_ENV isn't set properly
-const isProduction = process.env.NODE_ENV === 'production' ||
-                     baseURL.includes('vercel.app') ||
-                     baseURL.startsWith('https://');
+// CRITICAL: Force production mode for HTTPS to ensure SameSite=None
+const isHTTPS = baseURL.startsWith('https://');
+const isLocalhost = baseURL.includes('localhost');
 
-console.log('[Auth Config] Environment check:', {
-  NODE_ENV: process.env.NODE_ENV,
-  baseURL: baseURL,
-  isProduction: isProduction,
-  cookieSameSite: isProduction ? 'none' : 'lax'
+console.log('[Auth Config] Environment detection:', {
+  baseURL,
+  isHTTPS,
+  isLocalhost,
+  forcedSameSite: isHTTPS ? 'none' : 'lax'
 });
 
 // Define all trusted origins (both dev and production)
 const trustedOrigins = [
-  // Development URLs
   'http://localhost:3000',
   'http://localhost:3001',
-  // Production URLs
   'https://book-hackathon-alpha.vercel.app',
   'https://osqazi.github.io',
 ];
+
+// Cookie configuration - CRITICAL for cross-origin auth
+const cookieConfig = {
+  name: 'better-auth.session_token',
+  options: {
+    httpOnly: true,
+    secure: isHTTPS,
+    sameSite: isHTTPS ? 'none' : 'lax',
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  }
+};
 
 export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.NEON_DATABASE_URL,
   }),
-  // Base URL for the auth server (dynamic based on environment)
   baseURL: baseURL,
-  // Trusted origins (includes both dev and production)
   trustedOrigins: trustedOrigins,
   // Custom fields for background profiling
   user: {
@@ -65,30 +71,46 @@ export const auth = betterAuth({
       },
     },
   },
-  // Session configuration (7 days as specified)
+  // Session configuration with cookie options
   session: {
-    expiresIn: 7 * 24 * 60 * 60, // 7 days in seconds
+    expiresIn: 7 * 24 * 60 * 60,
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
   },
-  // Advanced security configuration (conditional based on environment)
+  // Advanced security configuration
   advanced: {
-    useSecureCookies: isProduction, // Enable secure cookies in production
-    disableOriginCheck: !isProduction, // Disable origin check only in development
+    useSecureCookies: isHTTPS,
     crossSubDomainCookies: {
       enabled: false,
     },
-    cookieOptions: {
-      // Required for cross-origin authentication (GitHub Pages -> Vercel)
-      sameSite: isProduction ? 'none' : 'lax',
-      secure: isProduction, // Must be true when sameSite is 'none'
-    },
+    cookiePrefix: isHTTPS ? '__Secure-' : '',
   },
-  // Other configurations
+  // Email/password auth
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // For now, can be enabled later
+    requireEmailVerification: false,
     password: {
-      // Minimum 8 characters as specified
       minLength: 8,
     },
   },
+  // CRITICAL: Set cookie options at root level
+  cookies: {
+    session_token: {
+      name: isHTTPS ? '__Secure-better-auth.session_token' : 'better-auth.session_token',
+      attributes: {
+        sameSite: isHTTPS ? 'none' : 'lax',
+        secure: isHTTPS,
+        httpOnly: true,
+        path: '/',
+      },
+    },
+  },
+});
+
+console.log('[Auth Config] Cookie configuration:', {
+  sameSite: isHTTPS ? 'none' : 'lax',
+  secure: isHTTPS,
+  prefix: isHTTPS ? '__Secure-' : ''
 });
