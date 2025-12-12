@@ -12,14 +12,31 @@ const __dirname = dirname(__filename);
 // Load environment variables from parent directory
 dotenv.config({ path: join(__dirname, '..', '.env') });
 
+// Determine if we're in production
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Configure base URL and trusted origins based on environment
+const baseURL = process.env.AUTH_BASE_URL || 'http://localhost:3001';
+const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+// Define all trusted origins (both dev and production)
+const trustedOrigins = [
+  // Development URLs
+  'http://localhost:3000',
+  'http://localhost:3001',
+  // Production URLs
+  'https://book-hackathon-alpha.vercel.app',
+  'https://osqazi.github.io',
+];
+
 export const auth = betterAuth({
   database: new Pool({
     connectionString: process.env.NEON_DATABASE_URL,
   }),
-  // Base URL for the auth server
-  baseURL: 'http://localhost:3001',
-  // Trusted origins
-  trustedOrigins: ['http://localhost:3000', 'http://localhost:3001'],
+  // Base URL for the auth server (dynamic based on environment)
+  baseURL: baseURL,
+  // Trusted origins (includes both dev and production)
+  trustedOrigins: trustedOrigins,
   // Custom fields for background profiling
   user: {
     additionalFields: {
@@ -42,10 +59,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 7 * 24 * 60 * 60, // 7 days in seconds
   },
-  // Advanced security configuration
+  // Advanced security configuration (conditional based on environment)
   advanced: {
-    useSecureCookies: false, // Disable for localhost development
-    disableOriginCheck: true, // Disable origin validation for development
+    useSecureCookies: isProduction, // Enable secure cookies in production
+    disableOriginCheck: !isProduction, // Disable origin check only in development
     crossSubDomainCookies: {
       enabled: false,
     },

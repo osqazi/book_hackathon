@@ -1,3 +1,38 @@
+// // auth-server/server.js
+// import express from 'express';
+// import cors from 'cors';
+// import { toNodeHandler } from 'better-auth/node';
+// import { auth } from './auth.js';
+
+// const app = express();
+// const PORT = process.env.PORT || 3001;
+
+// // Configure CORS middleware
+// app.use(
+//   cors({
+//     origin: ["http://localhost:3000", "http://localhost:3001"], // Allow Docusaurus origin
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,
+//     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+//     exposedHeaders: ["Set-Cookie"]
+//   })
+// );
+
+// // Mount Better-Auth routes using the correct handler
+// app.all("/api/auth/*", toNodeHandler(auth));
+
+// // Mount express json middleware after Better Auth handler
+// app.use(express.json());
+
+// // Health check endpoint
+// app.get('/health', (req, res) => {
+//   res.json({ status: 'ok', service: 'Auth Server' });
+// });
+
+// app.listen(PORT, () => {
+//   console.log(`Auth server running on port ${PORT}`);
+// });
+
 // auth-server/server.js
 import express from 'express';
 import cors from 'cors';
@@ -5,12 +40,22 @@ import { toNodeHandler } from 'better-auth/node';
 import { auth } from './auth.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
-// Configure CORS middleware
+// Hugging Face Spaces: ALWAYS use PORT + HOST
+const PORT = process.env.PORT || 7860;
+const HOST = "0.0.0.0";
+
+// Configure CORS middleware - whitelist all required origins
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"], // Allow Docusaurus origin
+    origin: [
+      // Development URLs
+      "http://localhost:3000",
+      "http://localhost:3001",
+      // Production URLs
+      "https://book-hackathon-alpha.vercel.app",
+      "https://osqazi.github.io"
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
@@ -18,17 +63,18 @@ app.use(
   })
 );
 
-// Mount Better-Auth routes using the correct handler
+// Better Auth routes
 app.all("/api/auth/*", toNodeHandler(auth));
 
-// Mount express json middleware after Better Auth handler
+// Express JSON AFTER auth
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Auth Server' });
+// Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", service: "Auth Server" });
 });
 
-app.listen(PORT, () => {
-  console.log(`Auth server running on port ${PORT}`);
+// Start server for Hugging Face
+app.listen(PORT, HOST, () => {
+  console.log(`Auth server running on http://${HOST}:${PORT}`);
 });
