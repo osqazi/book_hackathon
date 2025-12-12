@@ -8,12 +8,17 @@ const getAuthServerURL = () => {
   // Check if we're in production (GitHub Pages)
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    console.log('[AuthClient] Current hostname:', hostname);
     if (hostname === 'osqazi.github.io') {
-      return 'https://book-hackathon-alpha.vercel.app';
+      const authURL = 'https://book-hackathon-alpha.vercel.app/api/auth';
+      console.log('[AuthClient] Using production auth URL:', authURL);
+      return authURL;
     }
   }
   // Default to localhost for development
-  return 'http://localhost:3001';
+  const authURL = 'http://localhost:3001/api/auth';
+  console.log('[AuthClient] Using development auth URL:', authURL);
+  return authURL;
 };
 
 export const authClient = createAuthClient({

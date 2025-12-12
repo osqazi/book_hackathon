@@ -28,14 +28,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const fetchSession = async () => {
       setIsLoading(true);
       try {
+        console.log('[AuthProvider] Fetching session from auth server...');
         const currentSession = await authClient.getSession();
+        console.log('[AuthProvider] Session response:', currentSession);
         if (currentSession?.data) {
+          console.log('[AuthProvider] Session found:', currentSession.data);
           setSession(currentSession.data);
         } else {
+          console.log('[AuthProvider] No session data found');
           setSession(null);
         }
       } catch (error) {
-        console.error('Failed to get session:', error);
+        console.error('[AuthProvider] Failed to get session:', error);
         setSession(null);
       } finally {
         setIsLoading(false);
@@ -47,13 +51,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signIn = async (data: SignInData) => {
     try {
+      console.log('[AuthProvider] Signing in...');
       const result = await authClient.signIn.email({
         email: data.email,
         password: data.password,
       });
+      console.log('[AuthProvider] Sign in result:', result);
 
       if (!result.error && result.data) {
+        console.log('[AuthProvider] Sign in successful, fetching fresh session...');
         const freshSession = await authClient.getSession();
+        console.log('[AuthProvider] Fresh session:', freshSession);
         if (freshSession?.data) {
           setSession(freshSession.data);
         }
@@ -61,7 +69,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       return result;
     } catch (error) {
-      console.error('Sign in failed:', error);
+      console.error('[AuthProvider] Sign in failed:', error);
       throw error;
     }
   };
