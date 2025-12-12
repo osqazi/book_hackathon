@@ -66,6 +66,11 @@ export const auth = betterAuth({
     crossSubDomainCookies: {
       enabled: false,
     },
+    cookieOptions: {
+      // Required for cross-origin authentication (GitHub Pages -> Vercel)
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction, // Must be true when sameSite is 'none'
+    },
   },
   // Other configurations
   emailAndPassword: {
