@@ -369,5 +369,68 @@
   "theme.tags.tagsPageTitle": {
     "message": "Tags",
     "description": "The title of the tag list page"
+  },
+  "homepage.hero.description": {
+    "message": "جدید روبوٹکس فریم ورکس اور AI سسٹمز استعمال کرتے ہوئے ذہین انسان نما روبوٹس بنانے کے لیے ایک جامع رہنما۔"
+  },
+  "homepage.hero.startReading": {
+    "message": "پڑھنا شروع کریں"
+  },
+  "homepage.hero.viewGithub": {
+    "message": "GitHub پر دیکھیں"
+  },
+  "homepage.features.title": {
+    "message": "آپ کیا سیکھیں گے"
+  },
+  "homepage.features.ros2.title": {
+    "message": "ROS 2 بنیادی اصول"
+  },
+  "homepage.features.ros2.description": {
+    "message": "Robot Operating System 2 میں مہارت حاصل کریں، جو روبوٹکس ڈویلپمنٹ کے لیے صنعت کا معیاری فریم ورک ہے۔"
+  },
+  "homepage.features.simulation.title": {
+    "message": "سمیولیشن اور ٹیسٹنگ"
+  },
+  "homepage.features.simulation.description": {
+    "message": "Gazebo اور Isaac Sim استعمال کرتے ہوئے ورچوئل ماحول میں انسان نما روبوٹس کو سمیولیٹ اور ٹیسٹ کرنا سیکھیں۔"
+  },
+  "homepage.features.isaac.title": {
+    "message": "NVIDIA Isaac پلیٹ فارم"
+  },
+  "homepage.features.isaac.description": {
+    "message": "NVIDIA کے Isaac پلیٹ فارم کے ساتھ GPU-accelerated روبوٹکس سمیولیشن اور AI ٹریننگ سے فائدہ اٹھائیں۔"
+  },
+  "homepage.features.vla.title": {
+    "message": "Vision-Language-Action"
+  },
+  "homepage.features.vla.description": {
+    "message": "جدید ترین VLA ماڈلز کو مربوط کریں تاکہ روبوٹس قدرتی زبان کی کمانڈز کو سمجھ کر ان پر عمل کر سکیں۔"
+  },
+  "homepage.author.title": {
+    "message": "مصنف کے بارے میں"
+  },
+  "homepage.author.role": {
+    "message": "بانی اور CEO، MetaLog Inc."
+  },
+  "homepage.author.bio": {
+    "message": "اویس قاضی روبوٹکس اور مصنوعی ذہانت کے ایک معروف ماہر ہیں۔ MetaLog Inc. کے بانی کی حیثیت سے، وہ ذہین سسٹمز کی ترقی میں پیش پیش رہے ہیں جو AI اور روبوٹکس کے درمیان فاصلے کو ختم کرتے ہیں۔ یہ کتاب انسان نما روبوٹکس میں برسوں کے عملی تجربے اور تحقیق کی نمائندگی کرتی ہے، بنیادی تصورات سے لے کر جدید ترین vision-language-action سسٹمز تک۔"
+  },
+  "homepage.author.contact.title": {
+    "message": "رابطہ کریں"
+  },
+  "homepage.author.contact.facebook": {
+    "message": "Facebook پر MetaLog AI"
+  },
+  "homepage.cta.title": {
+    "message": "انسان نما روبوٹس بنانے کے لیے تیار ہیں؟"
+  },
+  "homepage.cta.description": {
+    "message": "عملی، ہاتھ سے سیکھنے والی رہنمائی کے ساتھ انسان نما روبوٹکس کی دنیا میں اپنا سفر شروع کریں۔"
+  },
+  "homepage.cta.getStarted": {
+    "message": "ابھی شروع کریں"
+  },
+  "homepage.meta.description": {
+    "message": "ROS 2، NVIDIA Isaac، اور Vision-Language-Action سسٹمز استعمال کرتے ہوئے ذہین انسان نما روبوٹس بنانے کے لیے ایک جامع رہنما۔"
   }
 }
