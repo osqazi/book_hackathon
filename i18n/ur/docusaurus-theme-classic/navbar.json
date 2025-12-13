@@ -1,0 +1,30 @@
+{
+  "title": {
+    "message": "انسان نما روبوٹکس کتاب",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "انسان نما روبوٹکس کتاب لوگو",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Book": {
+    "message": "کتاب",
+    "description": "Navbar item with label Book"
+  },
+  "item.label.Sign Up": {
+    "message": "سائن اپ",
+    "description": "Navbar item with label Sign Up"
+  },
+  "item.label.Sign In": {
+    "message": "سائن ان",
+    "description": "Navbar item with label Sign In"
+  },
+  "item.label.Personalization": {
+    "message": "ذاتی کاری",
+    "description": "Navbar item with label Personalization"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
+  }
+}

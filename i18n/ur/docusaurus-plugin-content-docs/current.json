@@ -1,0 +1,22 @@
+{
+  "version.label": {
+    "message": "اگلا",
+    "description": "The label for version current"
+  },
+  "sidebar.mainSidebar.category.Module 1: ROS 2 Fundamentals": {
+    "message": "ماڈیول 1: ROS 2 بنیادی اصول",
+    "description": "The label for category 'Module 1: ROS 2 Fundamentals' in sidebar 'mainSidebar'"
+  },
+  "sidebar.mainSidebar.category.Module 2: Simulation & Digital Twins": {
+    "message": "ماڈیول 2: سمولیشن اور ڈیجیٹل ٹونز",
+    "description": "The label for category 'Module 2: Simulation & Digital Twins' in sidebar 'mainSidebar'"
+  },
+  "sidebar.mainSidebar.category.Module 3: AI-Driven Perception (NVIDIA Isaac)": {
+    "message": "ماڈیول 3: AI سے چلنے والا ادراک (NVIDIA Isaac)",
+    "description": "The label for category 'Module 3: AI-Driven Perception (NVIDIA Isaac)' in sidebar 'mainSidebar'"
+  },
+  "sidebar.mainSidebar.category.Module 4: Vision-Language-Action": {
+    "message": "ماڈیول 4: ویژن-لینگوئج-ایکشن",
+    "description": "The label for category 'Module 4: Vision-Language-Action' in sidebar 'mainSidebar'"
+  }
+}
