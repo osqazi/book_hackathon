@@ -1,52 +1,110 @@
-// src/pages/personalization.tsx
 import React from 'react';
 import Layout from '@theme/Layout';
-import ContentAdapter from '../components/personalization/ContentAdapter';
-import { useAuth } from '../auth/hooks/useAuth';
-import '../css/auth-pages.css';
+import Link from '@docusaurus/Link';
+import { usePersonalizedChapters } from '@site/src/hooks/usePersonalization';
+import PersonalizationCard from '@site/src/components/PersonalizationCard';
+import PersonalizationEmptyState from '@site/src/components/PersonalizationEmptyState';
+import { useAuthContext } from '@site/src/auth/context/AuthProvider';
 
 const PersonalizationPage: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { session, isLoading: sessionLoading } = useAuthContext();
+  const { data: chapters, isLoading, isError } = usePersonalizedChapters();
 
-  return (
-    <Layout title="Personalized Content" description="Get personalized robotics content based on your background">
-      <div className="personalization-page">
-        <div className="personalization-container">
-          <div className="personalization-header">
-            <h1>Personalized Content</h1>
-            {isAuthenticated && user && (
-              <div className="user-info">
-                <p>Welcome, <strong>{user.email}</strong>!</p>
-              </div>
-            )}
-          </div>
-
-          <ContentAdapter
-            fallback={
-              <div className="personalization-fallback">
-                <h2>Sign in to see personalized content</h2>
-                <p>Please <a href="/book_hackathon/signin">sign in</a> or <a href="/book_hackathon/signup">sign up</a> to get personalized content recommendations based on your background in robotics, programming, and hardware development.</p>
-              </div>
-            }
-          >
-            <div className="personalized-content">
-              <h2>Recommended Content for You</h2>
-              <div className="content-grid">
-                <div className="content-card">
-                  <h3>Beginner: ROS 2 Basics</h3>
-                  <p>Introduction to ROS 2 concepts, nodes, topics, and services for newcomers to robotics development.</p>
-                </div>
-                <div className="content-card">
-                  <h3>Intermediate: Navigation Systems</h3>
-                  <p>Learn how to implement navigation systems for humanoid robots with path planning and obstacle avoidance.</p>
-                </div>
-                <div className="content-card">
-                  <h3>Advanced: AI Integration</h3>
-                  <p>Deep dive into integrating AI models with humanoid robot control systems for perception and decision making.</p>
-                </div>
+  // Check if user is authenticated
+  if (!sessionLoading && !session) {
+    return (
+      <Layout title="Personalized Chapters" description="Please log in to view personalized chapters">
+        <div className="container margin-vert--lg">
+          <div className="row">
+            <div className="col col--8 col--offset-2">
+              <div className="text--center padding-vert--lg">
+                <h1>Access Denied</h1>
+                <p>You need to be logged in to view your personalized chapters.</p>
+                <Link to="/auth/signin" className="button button--primary">
+                  Sign In
+                </Link>
               </div>
             </div>
-          </ContentAdapter>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (sessionLoading) {
+    return (
+      <Layout title="Loading..." description="Loading your personalized chapters">
+        <div className="container margin-vert--lg">
+          <div className="row">
+            <div className="col col--8 col--offset-2">
+              <div className="text--center padding-vert--lg">
+                <p>Loading...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Layout title="Personalized Chapters" description="Your bookmarked documentation chapters">
+        <div className="container margin-vert--lg">
+          <div className="row">
+            <div className="col col--10 col--offset-1">
+              <h1 className="text--center">Personalized Chapters</h1>
+              <div className="text--center padding-vert--lg">
+                <p>Loading your personalized chapters...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Layout title="Error" description="Error loading personalized chapters">
+        <div className="container margin-vert--lg">
+          <div className="row">
+            <div className="col col--8 col--offset-2">
+              <div className="text--center padding-vert--lg">
+                <h1>Error Loading Chapters</h1>
+                <p>There was an error loading your personalized chapters. Please try again later.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout title="Personalized Chapters" description="Your bookmarked documentation chapters">
+      <div className="container margin-vert--lg">
+        <div className="row">
+          <div className="col col--10 col--offset-1">
+            <h1 className="text--center">Personalized by You</h1>
+
+            {chapters && chapters.length > 0 ? (
+              <div className="personalization-grid">
+                {chapters.map((chapter) => (
+                  <PersonalizationCard
+                    key={chapter.id}
+                    id={chapter.id}
+                    chapterPath={chapter.chapter_path}
+                    chapterTitle={chapter.chapter_title || 'Untitled Chapter'}
+                    chapterExcerpt={chapter.chapter_excerpt}
+                    createdAt={chapter.created_at}
+                  />
+                ))}
+              </div>
+            ) : (
+              <PersonalizationEmptyState />
+            )}
+          </div>
         </div>
       </div>
     </Layout>

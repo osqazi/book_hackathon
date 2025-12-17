@@ -70,7 +70,7 @@ export const auth = betterAuth({
       sameSite: isHTTPS ? 'none' : 'lax',
       secure: isHTTPS,
       httpOnly: true,
-      partitioned: true, // New browser standards for cross-site cookies
+      // partitioned: true, // New browser standards for cross-site cookies
     },
     // Force secure cookies for HTTPS
     useSecureCookies: isHTTPS,

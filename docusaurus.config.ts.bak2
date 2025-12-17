@@ -63,9 +63,6 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.js',
           editUrl: undefined, // Disable edit links
-          beforeDefaultRemarkPlugins: [
-            require('./plugins/remark-personalization-button'),
-          ],
         },
         blog: false, // Disable blog feature
         theme: {

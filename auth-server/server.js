@@ -41,8 +41,8 @@ import { auth } from './auth.js';
 
 const app = express();
 
-// Hugging Face Spaces: ALWAYS use PORT + HOST
-const PORT = process.env.PORT || 7860;
+// Use PORT from environment or default to 3001 for local development
+const PORT = process.env.PORT || 3001;
 const HOST = "0.0.0.0";
 
 // Configure CORS middleware - whitelist all required origins
@@ -69,6 +69,12 @@ app.all("/api/auth/*", toNodeHandler(auth));
 // Express JSON AFTER auth
 app.use(express.json());
 
+// Import personalization routes
+import personalizationRouter from './routes/personalization.js';
+
+// Personalization routes
+app.use('/api/personalization', personalizationRouter);
+
 // Health check
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "Auth Server" });
@@ -78,3 +84,4 @@ app.get("/health", (req, res) => {
 app.listen(PORT, HOST, () => {
   console.log(`Auth server running on http://${HOST}:${PORT}`);
 });
+

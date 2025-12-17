@@ -212,6 +212,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 ## Active Technologies
 - TypeScript/JavaScript (latest stable) + Better-Auth, Docusaurus, React, Drizzle ORM, SQLite/PostgreSQL (002-better-auth-signup)
 - PostgreSQL for production, SQLite for development (002-better-auth-signup)
+- TypeScript 5.x, Node.js 18+ (003-chapter-personalization)
+- Neon Postgres (existing from 002-better-auth-signup), new table `personalized_chapters` (003-chapter-personalization)
 
 ## Recent Changes
 - 002-better-auth-signup: Added TypeScript/JavaScript (latest stable) + Better-Auth, Docusaurus, React, Drizzle ORM, SQLite/PostgreSQL

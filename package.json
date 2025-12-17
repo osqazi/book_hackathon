@@ -9,16 +9,19 @@
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
     "@docusaurus/theme-mermaid": "^3.9.2",
+    "@tanstack/react-query": "^5.90.12",
     "better-auth": "^1.4.6",
     "better-sqlite3": "^12.5.0",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "drizzle-kit": "^0.31.8",
     "drizzle-orm": "^0.45.1",
     "express": "^5.2.1",
+    "pg": "^8.16.3",
     "react": "^19.2.1",
-    "update-notifier": "^6.0.2"
+    "unist-util-visit": "^5.0.0",
+    "update-notifier": "^6.0.2",
+    "zod": "^3.25.76"
   },
   "scripts": {
     "docusaurus": "docusaurus",
@@ -31,7 +34,8 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "check-links": "echo 'Link checking not yet implemented'",
-    "validate-content": "node scripts/validate-content.js"
+    "validate-content": "node scripts/validate-content.js",
+    "dev:server": "node node_modules/tsx/dist/cli.mjs src/lib/auth-server.ts"
   },
   "keywords": [],
   "author": "",
@@ -39,7 +43,11 @@
   "description": "",
   "devDependencies": {
     "@testing-library/react": "^16.3.0",
+    "@types/express": "^4.17.25",
     "@types/jest": "^30.0.0",
-    "jest": "^30.2.0"
+    "@types/node": "^25.0.3",
+    "drizzle-kit": "^0.31.8",
+    "jest": "^30.2.0",
+    "ts-node": "^10.9.2"
   }
 }
