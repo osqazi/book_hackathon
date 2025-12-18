@@ -58,15 +58,9 @@ Grateful for the challenges, growth, and opportunities this hackathon provided. 
 ---
 
 **Live Demo**
-<iframe
-  width="560"
-  height="315"
-  src="https://www.youtube.com/embed/TOWzteJKEps"
-  title="YouTube video"
-  frameborder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowfullscreen>
-</iframe>
+## 🚀 Live Demo
+
+[![Watch the demo video](https://img.youtube.com/vi/TOWzteJKEps/maxresdefault.jpg)](https://www.youtube.com/watch?v=TOWzteJKEps)
 
 ```
 
