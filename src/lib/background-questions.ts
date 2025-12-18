@@ -11,52 +11,72 @@ export interface BackgroundQuestion {
 
 export const backgroundQuestions: BackgroundQuestion[] = [
   {
-    id: 'q1',
+    id: 'experience_level',
     category: 'software',
-    questionText: 'Which programming languages are you familiar with?',
-    options: ['Python', 'C++', 'JavaScript', 'C#', 'Java', 'ROS', 'Other'],
+    questionText: 'What is your overall robotics experience level?',
+    options: ['Complete Beginner', 'Some Basics', 'Intermediate', 'Advanced'],
     required: false,
   },
   {
-    id: 'q2',
+    id: 'programming_languages',
     category: 'software',
-    questionText: 'Which frameworks/libraries have you used?',
-    options: ['React', 'Vue', 'Angular', 'ROS 2', 'OpenCV', 'PyTorch', 'TensorFlow', 'Other'],
+    questionText: 'Which programming languages do you know?',
+    options: ['Python', 'C++', 'Java', 'MATLAB', 'None yet'],
     required: false,
   },
   {
-    id: 'q3',
+    id: 'robotics_topics',
     category: 'software',
-    questionText: 'What is your experience level with software development?',
-    options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
+    questionText: 'Which robotics topics interest you most? (Select all that apply)',
+    options: [
+      'Kinematics & Motion Planning',
+      'Computer Vision',
+      'Machine Learning & AI',
+      'Control Systems',
+      'ROS/ROS2',
+      'Sensor Integration',
+      'Hardware Design'
+    ],
     required: false,
   },
   {
-    id: 'q4',
+    id: 'humanoid_interest',
     category: 'hardware',
-    questionText: 'Which robotics platforms have you worked with?',
-    options: ['ROS', 'ROS 2', 'Arduino', 'Raspberry Pi', 'NVIDIA Jetson', 'Other'],
+    questionText: 'What aspects of humanoid robotics interest you?',
+    options: [
+      'Bipedal Walking',
+      'Manipulation & Grasping',
+      'Human-Robot Interaction',
+      'Balance & Stability',
+      'Full Body Control',
+      'All of the above'
+    ],
     required: false,
   },
   {
-    id: 'q5',
-    category: 'hardware',
-    questionText: 'Which sensors have you used in robotics projects?',
-    options: ['Cameras', 'LIDAR', 'IMU', 'Ultrasonic', 'GPS', 'Force/Torque', 'Other'],
+    id: 'learning_goals',
+    category: 'software',
+    questionText: 'What are your learning goals?',
+    options: [
+      'Build my own humanoid robot',
+      'Understand the theory',
+      'Work in robotics industry',
+      'Academic research',
+      'Hobby projects'
+    ],
     required: false,
   },
   {
-    id: 'q6',
+    id: 'prior_platforms',
     category: 'hardware',
-    questionText: 'Which actuators have you worked with?',
-    options: ['Servo Motors', 'Stepper Motors', 'DC Motors', 'Pneumatics', 'Hydraulics', 'Other'],
-    required: false,
-  },
-  {
-    id: 'q7',
-    category: 'hardware',
-    questionText: 'What is your experience level with hardware development?',
-    options: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
+    questionText: 'Have you worked with any robotics platforms before?',
+    options: [
+      'ROS/ROS2',
+      'Arduino/Raspberry Pi',
+      'Simulation (Gazebo, MuJoCo, etc.)',
+      'Commercial robots',
+      'No experience yet'
+    ],
     required: false,
   },
 ];

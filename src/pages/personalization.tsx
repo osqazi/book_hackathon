@@ -4,6 +4,7 @@ import Link from '@docusaurus/Link';
 import { usePersonalizedChapters } from '@site/src/hooks/usePersonalization';
 import PersonalizationCard from '@site/src/components/PersonalizationCard';
 import PersonalizationEmptyState from '@site/src/components/PersonalizationEmptyState';
+import RecommendedForYou from '@site/src/components/RecommendedForYou';
 import { useAuthContext } from '@site/src/auth/context/AuthProvider';
 
 const PersonalizationPage: React.FC = () => {
@@ -86,24 +87,30 @@ const PersonalizationPage: React.FC = () => {
       <div className="container margin-vert--lg">
         <div className="row">
           <div className="col col--10 col--offset-1">
-            <h1 className="text--center">Personalized by You</h1>
+            {/* Recommended Content Section */}
+            <RecommendedForYou />
 
-            {chapters && chapters.length > 0 ? (
-              <div className="personalization-grid">
-                {chapters.map((chapter) => (
-                  <PersonalizationCard
-                    key={chapter.id}
-                    id={chapter.id}
-                    chapterPath={chapter.chapter_path}
-                    chapterTitle={chapter.chapter_title || 'Untitled Chapter'}
-                    chapterExcerpt={chapter.chapter_excerpt}
-                    createdAt={chapter.created_at}
-                  />
-                ))}
-              </div>
-            ) : (
-              <PersonalizationEmptyState />
-            )}
+            {/* Personalized Chapters Section */}
+            <div style={{ marginTop: '3rem' }}>
+              <h1 className="text--center">Your Bookmarked Chapters</h1>
+
+              {chapters && chapters.length > 0 ? (
+                <div className="personalization-grid">
+                  {chapters.map((chapter) => (
+                    <PersonalizationCard
+                      key={chapter.id}
+                      id={chapter.id}
+                      chapterPath={chapter.chapter_path}
+                      chapterTitle={chapter.chapter_title || 'Untitled Chapter'}
+                      chapterExcerpt={chapter.chapter_excerpt}
+                      createdAt={chapter.created_at}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <PersonalizationEmptyState />
+              )}
+            </div>
           </div>
         </div>
       </div>
