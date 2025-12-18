@@ -63,8 +63,27 @@ app.use(
   })
 );
 
-// Better Auth routes
-app.all("/api/auth/*", toNodeHandler(auth));
+// Better Auth routes with error handling
+app.all("/api/auth/*", async (req, res, next) => {
+  try {
+    console.log('[Server] Auth request:', {
+      method: req.method,
+      url: req.url,
+      path: req.path,
+      origin: req.get('origin'),
+      contentType: req.get('content-type')
+    });
+    await toNodeHandler(auth)(req, res, next);
+  } catch (error) {
+    console.error('[Server] Auth handler error:', error);
+    console.error('[Server] Error stack:', error.stack);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
+  }
+});
 
 // Express JSON AFTER auth
 app.use(express.json());
