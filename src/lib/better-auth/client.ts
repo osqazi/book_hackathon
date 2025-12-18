@@ -25,11 +25,5 @@ export const authClient = createAuthClient({
   baseURL: getAuthServerURL(),
   fetchOptions: {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    mode: 'cors',
   },
-  // CRITICAL: Ensure cookies are persisted
-  plugins: [],
 });

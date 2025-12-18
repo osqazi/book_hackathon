@@ -40,8 +40,6 @@ export const auth = betterAuth({
   }),
   baseURL: baseURL,
   trustedOrigins: trustedOrigins,
-  // CRITICAL: Explicitly set the secret from environment
-  secret: process.env.BETTER_AUTH_SECRET,
   // Custom fields for background profiling
   user: {
     additionalFields: {
@@ -63,8 +61,6 @@ export const auth = betterAuth({
   // Session configuration
   session: {
     expiresIn: 7 * 24 * 60 * 60, // 7 days
-    // CRITICAL: Update session tokens on every request to keep them fresh
-    updateAge: 24 * 60 * 60, // Update session every 24 hours
   },
   // Advanced configuration
   advanced: {
@@ -74,8 +70,7 @@ export const auth = betterAuth({
       sameSite: isHTTPS ? 'none' : 'lax',
       secure: isHTTPS,
       httpOnly: true,
-      path: '/',
-      // partitioned: true, // New browser standards for cross-site cookies
+      partitioned: true, // New browser standards for cross-site cookies
     },
     // Force secure cookies for HTTPS
     useSecureCookies: isHTTPS,
