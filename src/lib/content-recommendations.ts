@@ -1,5 +1,5 @@
 // src/lib/content-recommendations.ts
-// Content recommendation engine based on user background questionnaire
+// Content recommendation engine - ONLY recommends pages that actually exist
 
 export interface RecommendedContent {
   title: string;
@@ -12,15 +12,13 @@ export interface RecommendedContent {
 
 export interface UserResponses {
   experience_level?: string[];
-  programming_languages?: string[];
-  robotics_topics?: string[];
-  humanoid_interest?: string[];
-  learning_goals?: string[];
-  prior_platforms?: string[];
+  python_experience?: string[];
+  primary_interest?: string[];
 }
 
 /**
  * Generate personalized content recommendations based on user questionnaire responses
+ * ONLY returns pages that actually exist in the documentation
  */
 export function getRecommendedContent(
   softwareBackground: any,
@@ -43,295 +41,266 @@ export function getRecommendedContent(
     return response === value;
   };
 
-  // Helper to check if any option is selected
-  const hasAnyResponse = (questionId: keyof UserResponses, values: string[]): boolean => {
-    return values.some(value => hasResponse(questionId, value));
-  };
+  // ===== ALWAYS RECOMMEND: Introduction =====
+  recommendations.push({
+    title: 'Introduction to Humanoid Robotics',
+    path: '/docs/intro',
+    excerpt: 'Start your journey through four essential modules: ROS 2, Simulation, AI Navigation, and Vision-Language-Action systems.',
+    reason: 'Essential starting point for all learners',
+    priority: 5,
+    category: 'getting-started'
+  });
 
-  // Recommendations for Complete Beginners
-  if (hasResponse('experience_level', 'Complete Beginner') ||
-      hasResponse('programming_languages', 'None yet')) {
+  // ===== COMPLETE BEGINNERS =====
+  if (hasResponse('experience_level', 'Complete Beginner')) {
+    // Start with Module 1
     recommendations.push({
-      title: 'Getting Started with Robotics',
-      path: '/docs/intro',
-      excerpt: 'Begin your robotics journey with fundamental concepts and prerequisites.',
+      title: 'Module 1: ROS 2 Fundamentals',
+      path: '/docs/module-1-ros2/',
+      excerpt: 'Learn the robotic nervous system - ROS 2 architecture, communication patterns, and robot modeling.',
       reason: 'Perfect starting point for beginners',
       priority: 5,
       category: 'getting-started'
     });
-    recommendations.push({
-      title: 'Introduction to Programming for Robotics',
-      path: '/docs/fundamentals/programming-basics',
-      excerpt: 'Learn programming fundamentals needed for robotics development.',
-      reason: 'Essential for those new to programming',
-      priority: 5,
-      category: 'getting-started'
-    });
-  }
 
-  // Recommendations based on interest in Kinematics
-  if (hasResponse('robotics_topics', 'Kinematics & Motion Planning')) {
     recommendations.push({
-      title: 'Forward and Inverse Kinematics',
-      path: '/docs/kinematics/forward-inverse',
-      excerpt: 'Master the mathematics of robot motion and positioning.',
-      reason: 'Matches your interest in kinematics',
+      title: 'ROS 2 Nodes and Topics',
+      path: '/docs/module-1-ros2/nodes-topics',
+      excerpt: 'Understanding the basic building blocks of ROS 2 communication.',
+      reason: 'First concepts to learn in ROS 2',
       priority: 4,
       category: 'fundamentals'
     });
+  }
+
+  // ===== ROS 2 INTEREST =====
+  if (hasResponse('primary_interest', 'ROS 2 Fundamentals') ||
+      hasResponse('primary_interest', 'All modules equally')) {
+
     recommendations.push({
-      title: 'Motion Planning Algorithms',
-      path: '/docs/motion-planning/algorithms',
-      excerpt: 'Learn path planning and trajectory optimization techniques.',
-      reason: 'Advanced motion planning techniques',
+      title: 'Module 1: ROS 2 Fundamentals',
+      path: '/docs/module-1-ros2/',
+      excerpt: 'Learn the robotic nervous system - ROS 2 architecture, communication patterns, and robot modeling.',
+      reason: 'Matches your interest in ROS 2',
+      priority: 5,
+      category: 'fundamentals'
+    });
+
+    recommendations.push({
+      title: 'ROS 2 Nodes and Topics',
+      path: '/docs/module-1-ros2/nodes-topics',
+      excerpt: 'Master asynchronous communication in ROS 2 using publish-subscribe patterns.',
+      reason: 'Core ROS 2 communication concepts',
+      priority: 5,
+      category: 'fundamentals'
+    });
+
+    recommendations.push({
+      title: 'ROS 2 Services and Actions',
+      path: '/docs/module-1-ros2/services-actions',
+      excerpt: 'Learn synchronous request-response and long-running task patterns in ROS 2.',
+      reason: 'Essential ROS 2 patterns',
+      priority: 4,
+      category: 'fundamentals'
+    });
+
+    recommendations.push({
+      title: 'URDF Robot Modeling',
+      path: '/docs/module-1-ros2/urdf-modeling',
+      excerpt: 'Describe humanoid robot structure using the Unified Robot Description Format.',
+      reason: 'Learn to model humanoid robots',
+      priority: 4,
+      category: 'practical'
+    });
+  }
+
+  // ===== SIMULATION & PHYSICS INTEREST =====
+  if (hasResponse('primary_interest', 'Simulation & Physics') ||
+      hasResponse('primary_interest', 'All modules equally')) {
+
+    recommendations.push({
+      title: 'Module 2: Simulation & Digital Twins',
+      path: '/docs/module-2-simulation/',
+      excerpt: 'Master virtual environments for safe, cost-effective robot development using Gazebo and Unity.',
+      reason: 'Matches your simulation interest',
+      priority: 5,
+      category: 'fundamentals'
+    });
+
+    recommendations.push({
+      title: 'Physics Principles for Simulation',
+      path: '/docs/module-2-simulation/physics-principles',
+      excerpt: 'Understand the physics engines behind realistic robot simulation.',
+      reason: 'Foundation of robot simulation',
+      priority: 4,
+      category: 'fundamentals'
+    });
+
+    recommendations.push({
+      title: 'Digital Twin Workflows',
+      path: '/docs/module-2-simulation/digital-twin',
+      excerpt: 'Create virtual replicas of physical robots for testing before deployment.',
+      reason: 'Industry-standard practice',
+      priority: 4,
+      category: 'practical'
+    });
+
+    recommendations.push({
+      title: 'Sensor Integration in Simulation',
+      path: '/docs/module-2-simulation/sensors',
+      excerpt: 'Integrate LiDAR, depth cameras, IMU, and RGB sensors in virtual environments.',
+      reason: 'Essential for realistic simulation',
+      priority: 4,
+      category: 'practical'
+    });
+  }
+
+  // ===== AI NAVIGATION / ISAAC INTEREST =====
+  if (hasResponse('primary_interest', 'AI Navigation (NVIDIA Isaac)') ||
+      hasResponse('primary_interest', 'All modules equally')) {
+
+    recommendations.push({
+      title: 'Module 3: AI-Driven Perception (NVIDIA Isaac)',
+      path: '/docs/module-3-isaac/',
+      excerpt: 'Unlock photorealistic simulation and AI-powered navigation with NVIDIA Isaac.',
+      reason: 'Matches your interest in AI navigation',
+      priority: 5,
+      category: 'advanced'
+    });
+
+    recommendations.push({
+      title: 'Isaac Sim for Robotics',
+      path: '/docs/module-3-isaac/isaac-sim',
+      excerpt: 'Use NVIDIA Isaac Sim for photorealistic sensor simulation and AI training.',
+      reason: 'State-of-the-art simulation platform',
+      priority: 5,
+      category: 'advanced'
+    });
+
+    recommendations.push({
+      title: 'Visual SLAM Navigation',
+      path: '/docs/module-3-isaac/vslam',
+      excerpt: 'Enable robots to build maps and navigate using visual simultaneous localization and mapping.',
+      reason: 'Critical for autonomous navigation',
+      priority: 4,
+      category: 'advanced'
+    });
+
+    recommendations.push({
+      title: 'Nav2 Navigation Stack',
+      path: '/docs/module-3-isaac/nav2',
+      excerpt: 'Implement autonomous navigation using the ROS 2 Nav2 stack.',
+      reason: 'Industry-standard navigation',
+      priority: 4,
+      category: 'practical'
+    });
+
+    recommendations.push({
+      title: 'Synthetic Data Generation',
+      path: '/docs/module-3-isaac/synthetic-data',
+      excerpt: 'Generate training data for AI models using photorealistic simulation.',
+      reason: 'Accelerate AI development',
       priority: 3,
       category: 'advanced'
     });
   }
 
-  // Recommendations for Computer Vision interest
-  if (hasResponse('robotics_topics', 'Computer Vision')) {
+  // ===== VISION-LANGUAGE-ACTION / LLM INTEREST =====
+  if (hasResponse('primary_interest', 'Vision-Language-Action (LLM/AI)') ||
+      hasResponse('primary_interest', 'All modules equally')) {
+
     recommendations.push({
-      title: 'Vision Systems for Humanoid Robots',
-      path: '/docs/perception/computer-vision',
-      excerpt: 'Implement visual perception for humanoid robots.',
-      reason: 'Aligns with your computer vision interest',
-      priority: 4,
-      category: 'fundamentals'
+      title: 'Module 4: Vision-Language-Action Integration',
+      path: '/docs/module-4-vla/',
+      excerpt: 'Build autonomous humanoid systems that understand and execute natural language commands.',
+      reason: 'Matches your interest in LLM/AI',
+      priority: 5,
+      category: 'advanced'
     });
+
     recommendations.push({
-      title: 'Object Detection and Recognition',
-      path: '/docs/perception/object-detection',
-      excerpt: 'Real-time object detection for robot manipulation.',
-      reason: 'Practical computer vision applications',
+      title: 'VLA Architecture Overview',
+      path: '/docs/module-4-vla/architecture',
+      excerpt: 'Understand how vision, language, and action work together in cognitive robots.',
+      reason: 'Foundation of intelligent robotics',
+      priority: 5,
+      category: 'advanced'
+    });
+
+    recommendations.push({
+      title: 'LLM-Based Task Planning',
+      path: '/docs/module-4-vla/llm-planning',
+      excerpt: 'Use large language models to plan complex robot tasks from natural language.',
+      reason: 'Cutting-edge AI for robotics',
+      priority: 4,
+      category: 'advanced'
+    });
+
+    recommendations.push({
+      title: 'Multimodal Perception',
+      path: '/docs/module-4-vla/multimodal',
+      excerpt: 'Combine vision, language, and sensor data for comprehensive understanding.',
+      reason: 'Advanced perception techniques',
+      priority: 4,
+      category: 'advanced'
+    });
+
+    recommendations.push({
+      title: 'Speech Recognition with Whisper',
+      path: '/docs/module-4-vla/whisper',
+      excerpt: 'Implement voice command recognition using OpenAI Whisper.',
+      reason: 'Enable voice control',
       priority: 3,
       category: 'practical'
     });
   }
 
-  // Recommendations for Machine Learning & AI
-  if (hasResponse('robotics_topics', 'Machine Learning & AI')) {
-    recommendations.push({
-      title: 'Machine Learning for Robotics',
-      path: '/docs/ai/machine-learning',
-      excerpt: 'Apply ML techniques to improve robot behavior.',
-      reason: 'Matches your AI/ML interest',
-      priority: 4,
-      category: 'advanced'
-    });
-    recommendations.push({
-      title: 'Reinforcement Learning for Locomotion',
-      path: '/docs/ai/reinforcement-learning',
-      excerpt: 'Train humanoid robots to walk using RL.',
-      reason: 'Cutting-edge AI techniques',
-      priority: 3,
-      category: 'advanced'
-    });
+  // ===== PYTHON EXPERIENCE RECOMMENDATIONS =====
+  if (hasResponse('python_experience', 'Yes, comfortable with Python')) {
+    // Prioritize Python-heavy modules (ROS 2, Module 4)
+    if (!recommendations.some(r => r.path === '/docs/module-1-ros2/')) {
+      recommendations.push({
+        title: 'Module 1: ROS 2 Fundamentals',
+        path: '/docs/module-1-ros2/',
+        excerpt: 'Perfect for Python developers - learn ROS 2 with rclpy library integration.',
+        reason: 'Great fit for your Python skills',
+        priority: 4,
+        category: 'fundamentals'
+      });
+    }
   }
 
-  // Recommendations for Control Systems
-  if (hasResponse('robotics_topics', 'Control Systems')) {
-    recommendations.push({
-      title: 'Control Theory Fundamentals',
-      path: '/docs/control/fundamentals',
-      excerpt: 'PID controllers and feedback systems for robots.',
-      reason: 'Essential for control systems',
-      priority: 4,
-      category: 'fundamentals'
-    });
-    recommendations.push({
-      title: 'Balance Control for Bipedal Robots',
-      path: '/docs/control/balance',
-      excerpt: 'Advanced techniques for maintaining robot stability.',
-      reason: 'Advanced control applications',
-      priority: 3,
-      category: 'advanced'
-    });
+  // ===== NO PYTHON EXPERIENCE =====
+  if (hasResponse('python_experience', 'No, but willing to learn')) {
+    // Start with intro and basic ROS concepts
+    if (!recommendations.some(r => r.path === '/docs/module-1-ros2/nodes-topics')) {
+      recommendations.push({
+        title: 'ROS 2 Nodes and Topics',
+        path: '/docs/module-1-ros2/nodes-topics',
+        excerpt: 'Learn ROS 2 fundamentals alongside Python basics.',
+        reason: 'Good starting point for learning both',
+        priority: 3,
+        category: 'getting-started'
+      });
+    }
   }
 
-  // Recommendations for ROS/ROS2 interest
-  if (hasResponse('robotics_topics', 'ROS/ROS2') ||
-      hasResponse('prior_platforms', 'ROS/ROS2')) {
-    recommendations.push({
-      title: 'ROS 2 for Humanoid Robots',
-      path: '/docs/software/ros2-intro',
-      excerpt: 'Set up ROS 2 for humanoid robot development.',
-      reason: 'Build on your ROS experience',
-      priority: 5,
-      category: 'practical'
-    });
-    recommendations.push({
-      title: 'Creating Custom ROS 2 Nodes',
-      path: '/docs/software/ros2-nodes',
-      excerpt: 'Develop custom nodes for humanoid robot control.',
-      reason: 'Practical ROS development',
-      priority: 4,
-      category: 'practical'
-    });
-  }
+  // ===== ADD REFERENCES FOR ALL USERS =====
+  recommendations.push({
+    title: 'References and Resources',
+    path: '/docs/references',
+    excerpt: 'Comprehensive list of additional learning resources, papers, and documentation.',
+    reason: 'Helpful reference material',
+    priority: 2,
+    category: 'fundamentals'
+  });
 
-  // Recommendations based on humanoid-specific interests
-  if (hasResponse('humanoid_interest', 'Bipedal Walking')) {
-    recommendations.push({
-      title: 'Bipedal Locomotion',
-      path: '/docs/locomotion/bipedal-walking',
-      excerpt: 'Understand and implement bipedal walking gaits.',
-      reason: 'Matches your interest in walking robots',
-      priority: 5,
-      category: 'fundamentals'
-    });
-    recommendations.push({
-      title: 'Gait Generation and Optimization',
-      path: '/docs/locomotion/gait-optimization',
-      excerpt: 'Create efficient and stable walking patterns.',
-      reason: 'Advanced walking techniques',
-      priority: 4,
-      category: 'advanced'
-    });
-  }
+  // Remove duplicates and sort by priority
+  const uniqueRecommendations = Array.from(
+    new Map(recommendations.map(item => [item.path, item])).values()
+  );
 
-  if (hasResponse('humanoid_interest', 'Manipulation & Grasping')) {
-    recommendations.push({
-      title: 'Robotic Manipulation Fundamentals',
-      path: '/docs/manipulation/fundamentals',
-      excerpt: 'Learn how humanoid robots interact with objects.',
-      reason: 'Focused on manipulation skills',
-      priority: 5,
-      category: 'fundamentals'
-    });
-    recommendations.push({
-      title: 'Grasp Planning and Execution',
-      path: '/docs/manipulation/grasping',
-      excerpt: 'Advanced techniques for robust object grasping.',
-      reason: 'Practical manipulation skills',
-      priority: 4,
-      category: 'practical'
-    });
-  }
-
-  if (hasResponse('humanoid_interest', 'Human-Robot Interaction')) {
-    recommendations.push({
-      title: 'Human-Robot Interaction Design',
-      path: '/docs/hri/design-principles',
-      excerpt: 'Create intuitive interfaces for robot interaction.',
-      reason: 'Aligns with HRI interest',
-      priority: 4,
-      category: 'fundamentals'
-    });
-    recommendations.push({
-      title: 'Social Robotics and Communication',
-      path: '/docs/hri/social-robotics',
-      excerpt: 'Enable natural human-robot communication.',
-      reason: 'Advanced HRI concepts',
-      priority: 3,
-      category: 'advanced'
-    });
-  }
-
-  if (hasResponse('humanoid_interest', 'Balance & Stability')) {
-    recommendations.push({
-      title: 'Balance and Stability Control',
-      path: '/docs/control/balance',
-      excerpt: 'Techniques for maintaining robot balance.',
-      reason: 'Essential for stable humanoid robots',
-      priority: 5,
-      category: 'fundamentals'
-    });
-    recommendations.push({
-      title: 'Zero Moment Point (ZMP) Control',
-      path: '/docs/control/zmp',
-      excerpt: 'Implement ZMP-based stability control.',
-      reason: 'Industry-standard stability technique',
-      priority: 4,
-      category: 'advanced'
-    });
-  }
-
-  // Recommendations based on learning goals
-  if (hasResponse('learning_goals', 'Build my own humanoid robot')) {
-    recommendations.push({
-      title: 'Hardware Design for Humanoid Robots',
-      path: '/docs/hardware/design-guide',
-      excerpt: 'Complete guide to building your own humanoid robot.',
-      reason: 'Perfect for DIY robot builders',
-      priority: 5,
-      category: 'practical'
-    });
-    recommendations.push({
-      title: 'Component Selection Guide',
-      path: '/docs/hardware/components',
-      excerpt: 'Choose the right motors, sensors, and controllers.',
-      reason: 'Essential for hardware projects',
-      priority: 5,
-      category: 'practical'
-    });
-  }
-
-  if (hasResponse('learning_goals', 'Academic research')) {
-    recommendations.push({
-      title: 'Research Methodologies in Humanoid Robotics',
-      path: '/docs/research/methodologies',
-      excerpt: 'Conduct rigorous robotics research.',
-      reason: 'Tailored for researchers',
-      priority: 4,
-      category: 'advanced'
-    });
-    recommendations.push({
-      title: 'State-of-the-Art Humanoid Systems',
-      path: '/docs/research/state-of-art',
-      excerpt: 'Survey of cutting-edge humanoid robots.',
-      reason: 'Research background',
-      priority: 3,
-      category: 'advanced'
-    });
-  }
-
-  // For users with simulation experience
-  if (hasResponse('prior_platforms', 'Simulation (Gazebo, MuJoCo, etc.)')) {
-    recommendations.push({
-      title: 'Simulation for Humanoid Robots',
-      path: '/docs/simulation/gazebo',
-      excerpt: 'Test and validate your robots in simulation.',
-      reason: 'Build on your simulation experience',
-      priority: 4,
-      category: 'practical'
-    });
-    recommendations.push({
-      title: 'Sim-to-Real Transfer',
-      path: '/docs/simulation/sim-to-real',
-      excerpt: 'Bridge the gap between simulation and reality.',
-      reason: 'Advanced simulation techniques',
-      priority: 3,
-      category: 'advanced'
-    });
-  }
-
-  // Python users get Python-specific content
-  if (hasResponse('programming_languages', 'Python')) {
-    recommendations.push({
-      title: 'Python for Robotics',
-      path: '/docs/programming/python',
-      excerpt: 'Leverage Python for rapid robot development.',
-      reason: 'Perfect for Python developers',
-      priority: 4,
-      category: 'practical'
-    });
-  }
-
-  // C++ users get performance-focused content
-  if (hasResponse('programming_languages', 'C++')) {
-    recommendations.push({
-      title: 'Real-Time Control with C++',
-      path: '/docs/programming/cpp-realtime',
-      excerpt: 'High-performance robot control in C++.',
-      reason: 'Matches your C++ expertise',
-      priority: 4,
-      category: 'advanced'
-    });
-  }
-
-  // Sort by priority (highest first) and return top 8-10 recommendations
-  return recommendations
+  return uniqueRecommendations
     .sort((a, b) => b.priority - a.priority)
     .slice(0, 10);
 }
