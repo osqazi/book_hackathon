@@ -56,12 +56,24 @@ app.use(
       "https://book-hackathon-alpha.vercel.app",
       "https://osqazi.github.io"
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Cookie"],
     exposedHeaders: ["Set-Cookie"]
   })
 );
+
+// Debug middleware to log requests and cookies
+app.use((req, res, next) => {
+  console.log('[Server] Request:', {
+    method: req.method,
+    path: req.path,
+    origin: req.get('origin'),
+    cookies: req.headers.cookie,
+    hasSession: !!req.headers.cookie?.includes('better-auth')
+  });
+  next();
+});
 
 // Better Auth routes
 app.all("/api/auth/*", toNodeHandler(auth));
