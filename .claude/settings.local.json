@@ -151,7 +151,8 @@
       "Bash(timeout 10 bash:*)",
       "Bash(timeout 60 bash:*)",
       "Bash(chmod:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(npm uninstall:*)"
     ],
     "deny": [],
     "ask": []
