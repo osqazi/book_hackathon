@@ -17,13 +17,24 @@ interface AddPersonalizationRequest {
   chapter_excerpt?: string;
 }
 
-// Get the backend URL - use localhost for development
+// Get the backend URL based on environment
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
-    // Client-side: use localhost for development
-    return 'http://localhost:3001';
+    const hostname = window.location.hostname;
+    console.log('[Personalization] Current hostname:', hostname);
+
+    // Production: GitHub Pages
+    if (hostname === 'osqazi.github.io') {
+      const backendUrl = 'https://book-hackathon-alpha.vercel.app';
+      console.log('[Personalization] Using production backend:', backendUrl);
+      return backendUrl;
+    }
   }
-  return 'http://localhost:3001';
+
+  // Development: localhost
+  const backendUrl = 'http://localhost:3001';
+  console.log('[Personalization] Using development backend:', backendUrl);
+  return backendUrl;
 };
 
 // Custom fetch function that includes auth headers
