@@ -1,9 +1,0 @@
-{
-  "name": "remark-personalization-button",
-  "version": "1.0.0",
-  "type": "commonjs",
-  "main": "index.js",
-  "dependencies": {
-    "unist-util-visit": "^4.1.2"
-  }
-}

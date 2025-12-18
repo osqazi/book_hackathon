@@ -1,6 +1,3 @@
-const visit = require('unist-util-visit');
-const path = require('path');
-
 module.exports = function plugin() {
   return function transformer(tree, file) {
     // Only add the button to doc files, not other MDX content
@@ -54,14 +51,15 @@ module.exports = function plugin() {
       // Insert the import at the beginning of the tree
       tree.children.unshift(importNode);
 
-      // Insert the button after the first heading (usually the title)
+      // Find the first h1 heading by manually traversing children
       let insertIndex = -1;
-      visit(tree, ['heading'], (node, index) => {
-        if (node.depth === 1 && index !== undefined) {
-          insertIndex = index + 1;
-          return visit.SKIP;
+      for (let i = 0; i < tree.children.length; i++) {
+        const node = tree.children[i];
+        if (node.type === 'heading' && node.depth === 1) {
+          insertIndex = i + 1;
+          break;
         }
-      });
+      }
 
       if (insertIndex !== -1) {
         tree.children.splice(insertIndex, 0, buttonNode);
