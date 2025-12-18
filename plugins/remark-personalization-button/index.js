@@ -35,8 +35,7 @@ module.exports = function plugin() {
                 type: 'ImportDeclaration',
                 specifiers: [
                   {
-                    type: 'ImportSpecifier',
-                    imported: { type: 'Identifier', name: 'DocPersonalizationButton' },
+                    type: 'ImportDefaultSpecifier',
                     local: { type: 'Identifier', name: 'DocPersonalizationButton' }
                   }
                 ],
