@@ -23,8 +23,8 @@ async def lifespan(app: FastAPI):
 
     # Initialize the RAG system
     app.state.rag_system = RAGSystem(
-        qdrant_url="https://9751179e-b403-46d5-bf9e-d46ef1603cb7.us-east4-0.gcp.cloud.qdrant.io",
-        qdrant_api_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.BRl-MTLWa4X8xZDMvz8e2KEbz53V5Rt4_uT78IBuWH8",
+        qdrant_url="qdrant_url",
+        qdrant_api_key="qdrant_api_key",
         cohere_api_key=os.getenv("COHERE_API_KEY")
     )
     # Initialize the vector store with book content
